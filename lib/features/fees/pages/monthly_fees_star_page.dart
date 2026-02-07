@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../app/router/app_pages.dart';
+import '../../../app/router/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/gradient_button.dart';
 import '../../children/controllers/children_controller.dart';
@@ -107,12 +107,12 @@ class MonthlyFeesStartPage extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               color: selected
-                                  ? AppColors.primarySoft.withOpacity(0.1)
-                                  : Colors.grey.withOpacity(0.05),
+                                  ? AppColors.primarySoft.withValues(alpha:0.1)
+                                  : Colors.grey.withValues(alpha:0.05),
                               border: Border.all(
                                 color: selected
                                     ? AppColors.primarySoft
-                                    : Colors.grey.withOpacity(0.3),
+                                    : Colors.grey.withValues(alpha:0.3),
                                 width: 2,
                               ),
                             ),

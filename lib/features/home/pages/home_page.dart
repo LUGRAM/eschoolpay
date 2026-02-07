@@ -1,8 +1,6 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../app/router/routes.dart';
 import '../../../app/widgets/app_drawer.dart';
 import '../../children/controllers/children_controller.dart';
 import '../../fees/controllers/fees_controller.dart';
@@ -123,7 +121,7 @@ class _ESchoolHomePageState extends State<ESchoolHomePage> {
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05), // Ombre très légère
+              color: Colors.black.withValues(alpha:0.05), // Ombre très légère
               blurRadius: 20,                        // Rayon de flou important pour la douceur
               offset: const Offset(0, -5),           // Vers le haut pour l'effet d'élévation
             ),
@@ -164,7 +162,7 @@ class _ESchoolHomePageState extends State<ESchoolHomePage> {
         decoration: BoxDecoration(
           color: isSelected ? primaryBlue : Colors.transparent,
           shape: BoxShape.circle,
-          boxShadow: isSelected ? [BoxShadow(color: primaryBlue.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 5))] : [],
+          boxShadow: isSelected ? [BoxShadow(color: primaryBlue.withValues(alpha:0.4), blurRadius: 10, offset: const Offset(0, 5))] : [],
         ),
         child: Icon(icon, color: isSelected ? Colors.white : Colors.black26, size: 26),
       ),
@@ -202,7 +200,7 @@ class BNBCustomPainter extends CustomPainter {
     // On soustrait l'encoche du rectangle proprement
     Path finalPath = Path.combine(PathOperation.difference, mainPath, notchPath);
 
-    canvas.drawShadow(finalPath, Colors.black.withOpacity(0.1), 10, true);
+    canvas.drawShadow(finalPath, Colors.black.withValues(alpha:0.1), 10, true);
     canvas.drawPath(finalPath, paint);
   }
 

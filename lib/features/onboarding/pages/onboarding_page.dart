@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../app/theme/app_colors.dart';
 import '../controllers/onboarding_controller.dart';
-import '../widgets/onboarding_slide.dart';
 
 // features/onboarding/presentation/pages/onboarding_page.dart
 class OnboardingPage extends StatelessWidget {

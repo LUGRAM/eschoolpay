@@ -7,6 +7,5 @@ class ChildrenController extends GetxController {
 
   void addChild(ChildModel child) {
     children.add(child);
-    Get.snackbar("Succès", "${child.firstName} a été ajouté(e)");
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../app/router/app_pages.dart';
+import '../../../app/router/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/gradient_button.dart';
 import '../../children/controllers/children_controller.dart';
@@ -90,7 +90,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
                     shape: BoxShape.circle,
                     color: isCurrent || isPast ? AppColors.primarySoft : Colors.grey.shade200,
                     boxShadow: isCurrent ? [
-                      BoxShadow(color: AppColors.primarySoft.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4))
+                      BoxShadow(color: AppColors.primarySoft.withValues(alpha:0.4), blurRadius: 10, offset: const Offset(0, 4))
                     ] : [],
                   ),
                   child: Center(
@@ -149,7 +149,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
           }
 
           return DropdownButtonFormField<String>(
-            value: regCtrl.selectedChild.value?.id,
+            initialValue: regCtrl.selectedChild.value?.id,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -180,9 +180,9 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.withOpacity(0.3)),
+                border: Border.all(color: Colors.red.withValues(alpha:0.3)),
               ),
               child: Row(
                 children: const [
@@ -209,7 +209,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
         const Text("Établissement", style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: selectedSchoolName,
+          initialValue: selectedSchoolName,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -244,9 +244,9 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha:0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.withOpacity(0.3)),
+              border: Border.all(color: Colors.grey.withValues(alpha:0.3)),
             ),
             child: const Text(
               "Veuillez d'abord sélectionner un établissement",
@@ -256,7 +256,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
         ] else ...[
           // ✅ Ici selectedSchoolName est garanti non-null
           DropdownButtonFormField<String>(
-            value: selectedLevel,
+            initialValue: selectedLevel,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -289,13 +289,13 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: regCtrl.totalAmount.value > 0
-                ? AppColors.primarySoft.withOpacity(0.1)
-                : Colors.grey.withOpacity(0.05),
+                ? AppColors.primarySoft.withValues(alpha:0.1)
+                : Colors.grey.withValues(alpha:0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: regCtrl.totalAmount.value > 0
                   ? AppColors.primarySoft
-                  : Colors.grey.withOpacity(0.2),
+                  : Colors.grey.withValues(alpha:0.2),
               width: 2,
             ),
           ),
@@ -432,7 +432,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: isSelected ? AppColors.primarySoft : Colors.grey.shade200, width: 2),
-        color: isSelected ? AppColors.primarySoft.withOpacity(0.05) : Colors.white,
+        color: isSelected ? AppColors.primarySoft.withValues(alpha:0.05) : Colors.white,
       ),
       child: Row(
         children: [
@@ -494,7 +494,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
     );
 
     // 5️⃣ Redirection
-    Get.offNamed(Routes.childPaymentsHistory);
+    //Get.offNamed(Routes.childPaymentsHistory);
 
     // 6️⃣ Feedback utilisateur
     Get.snackbar(

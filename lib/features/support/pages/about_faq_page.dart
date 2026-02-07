@@ -62,14 +62,14 @@ class AboutFaqPage extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24), // Très arrondi
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 10)),
+          BoxShadow(color: Colors.black.withValues(alpha:0.04), blurRadius: 20, offset: const Offset(0, 10)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            backgroundColor: iconColor.withOpacity(0.1),
+            backgroundColor: iconColor.withValues(alpha:0.1),
             child: Icon(icon, color: iconColor),
           ),
           const SizedBox(height: 15),

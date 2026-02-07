@@ -115,7 +115,11 @@ class FeesController extends GetxController {
     await Future.delayed(const Duration(seconds: 2));
 
     final child = selectedChild.value!;
-    final status = 'SUCCESS';
+
+    // 1. DÉTERMINATION DU STATUT LOGIQUE
+    // Si c'est en espèces, le statut est 'PENDING' (en attente),
+    // sinon c'est 'SUCCESS' (considérant que l'API mobile money a répondu OK)
+    final String status = (method == 'Espèces') ? 'PENDING' : 'SUCCESS';
 
     String label;
     switch (currentService.value) {
@@ -128,9 +132,8 @@ class FeesController extends GetxController {
       case ServiceType.transport:
         label = "Transport • ${selectedTransportOption.value?.label ?? ''}";
         break;
-      case ServiceType.inscription:
       default:
-        label = "Inscription";
+        label = "Paiement Divers";
         break;
     }
 
@@ -141,7 +144,7 @@ class FeesController extends GetxController {
       feeLabel: label,
       amount: totalAmount,
       method: method,
-      status: status,
+      status: status, // On utilise la variable dynamique ici
       createdAt: DateTime.now(),
     );
 

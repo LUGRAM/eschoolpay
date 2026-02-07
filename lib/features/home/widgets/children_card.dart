@@ -21,7 +21,7 @@ class ChildrenCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -34,7 +34,7 @@ class ChildrenCard extends StatelessWidget {
             child: Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: primaryBlue.withOpacity(0.1),
+                  backgroundColor: primaryBlue.withValues(alpha:0.1),
                   child: Icon(Icons.child_care_rounded, color: primaryBlue),
                 ),
                 const SizedBox(width: 15),
@@ -72,7 +72,7 @@ class ChildrenCard extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 28,
-                          backgroundColor: primaryBlue.withOpacity(0.1),
+                          backgroundColor: primaryBlue.withValues(alpha:0.1),
                           child: Text(
                             child.fullName.substring(0, 1).toUpperCase(),
                             style: TextStyle(color: primaryBlue, fontWeight: FontWeight.bold),

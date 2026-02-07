@@ -6,17 +6,16 @@ import '../../../app/router/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/app_text_field.dart';
 
-class PhoneSignupPage extends StatefulWidget {
-  const PhoneSignupPage({super.key});
+class PhoneSigninPage extends StatefulWidget {
+  const PhoneSigninPage({super.key});
 
   @override
-  State<PhoneSignupPage> createState() => _PhoneSignupPageState();
+  State<PhoneSigninPage> createState() => _PhoneSigninPageState();
 }
 
-class _PhoneSignupPageState extends State<PhoneSignupPage> {
+class _PhoneSigninPageState extends State<PhoneSigninPage> {
   final _phoneCtrl = TextEditingController();
   bool _isLoading = false;
-  bool _acceptedTerms = false;
   String? _errorMessage; // ✅ Message d'erreur externe
 
   @override
@@ -41,7 +40,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "Bienvenue !",
+              "Bon retour !",
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -50,7 +49,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
             ),
             const SizedBox(height: 10),
             const Text(
-              "Entrez votre numéro pour créer votre compte.",
+              "Entrez votre numéro pour vous connecter.",
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 40),
@@ -69,7 +68,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
 
             // ✅ Champ sans validation interne
             AppTextField(
-              hint: "074 xx xx xx",
+              hint: "07x xx xx xx",
               prefixIcon: const Icon(Icons.phone),
               keyboardType: TextInputType.phone,
               controller: _phoneCtrl,
@@ -106,7 +105,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
 
             const SizedBox(height: 32),
 
-            // Bouton d'inscription
+            // Bouton de connexion
             SizedBox(
               width: double.infinity,
               height: 60,
@@ -119,7 +118,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                onPressed: _isLoading ? null : _handleSignup,
+                onPressed: _isLoading ? null : _handleSignin,
                 child: _isLoading
                     ? const SizedBox(
                   height: 28,
@@ -130,7 +129,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                   ),
                 )
                     : const Text(
-                  "Créer mon compte",
+                  "Se connecter",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -142,13 +141,13 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
 
             const SizedBox(height: 24),
 
-            // Lien vers connexion
+            // Lien vers inscription
             Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Vous avez déjà un compte ? ",
+                    "Pas encore de compte ? ",
                     style: TextStyle(
                       fontSize: 16,
                       color: AppColors.textMuted.withValues(alpha: 0.7),
@@ -156,7 +155,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Get.offNamed(Routes.phoneSignin);
+                      Get.offNamed(Routes.phoneSignup);
                     },
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -164,7 +163,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: const Text(
-                      "Se connecter",
+                      "Créer un compte",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -185,7 +184,7 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
     );
   }
 
-  // Validation qui retourne le message d'erreur ou null
+  // ✅ Validation qui retourne le message d'erreur ou null
   String? _validatePhone(String value) {
     if (value.trim().isEmpty) {
       return "Numéro de téléphone requis";
@@ -197,7 +196,6 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
       return "Le numéro doit contenir 9 chiffres";
     }
 
-    // Validation correcte avec 3 premiers chiffres
     final validPrefixes = ['077', '066', '065', '074', '011', '062'];
     final prefix = cleanPhone.substring(0, 3);
 
@@ -208,17 +206,17 @@ class _PhoneSignupPageState extends State<PhoneSignupPage> {
     return null;
   }
 
-  Future<void> _handleSignup() async {
+  Future<void> _handleSignin() async {
     FocusScope.of(context).unfocus();
 
-    // Validation manuelle du téléphone
-    final phoneError = _validatePhone(_phoneCtrl.text);
+    // ✅ Validation manuelle et mise à jour du message d'erreur
+    final error = _validatePhone(_phoneCtrl.text);
 
     setState(() {
-      _errorMessage = phoneError;
+      _errorMessage = error;
     });
 
-    if (phoneError != null) {
+    if (error != null) {
       return;
     }
 

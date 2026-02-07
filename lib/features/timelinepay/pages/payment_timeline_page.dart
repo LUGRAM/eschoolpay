@@ -127,10 +127,10 @@ class PaymentTimelinePage extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(15),
                 border: status == TimelineStatus.inProgress
-                    ? Border.all(color: Colors.orange.withOpacity(0.5), width: 1)
+                    ? Border.all(color: Colors.orange.withValues(alpha:0.5), width: 1)
                     : null,
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))
+                  BoxShadow(color: Colors.black.withValues(alpha:0.02), blurRadius: 10, offset: const Offset(0, 4))
                 ],
               ),
               child: Column(

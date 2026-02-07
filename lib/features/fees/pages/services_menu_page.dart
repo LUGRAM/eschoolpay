@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/router/routes.dart';
+import '../../../app/widgets/page_scaffold.dart';
 import '../controllers/fees_controller.dart';
 
 class ServicesMenuPage extends StatelessWidget {
@@ -10,9 +11,9 @@ class ServicesMenuPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final feesCtrl = Get.find<FeesController>();
 
-    return Scaffold(
-      appBar: AppBar(title: const Text("Nos Services Scolaires")),
-      body: GridView.count(
+    return PageScaffold(
+      title: "Services Scolaires",
+      child: GridView.count(
         padding: const EdgeInsets.all(20),
         crossAxisCount: 2,
         mainAxisSpacing: 15,
@@ -73,9 +74,9 @@ class ServicesMenuPage extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha:0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha:0.3)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -62,7 +62,7 @@ class ChildrenListPage extends StatelessWidget {
                         ),
                         IconButton(
                           onPressed: () => Get.toNamed(
-                            Routes.childPaymentsHistory,
+                            Routes.childPaymentHistory,
                             arguments: child,
                           ),
                           icon: const Icon(Icons.receipt_long_rounded),

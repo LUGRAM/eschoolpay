@@ -29,7 +29,7 @@ class SettingsPage extends StatelessWidget {
             _buildSettingsItem(
               icon: Icons.person_outline,
               title: "Informations personnelles",
-              onTap: () => Get.toNamed(Routes.authWelcome), // Vers edit_sheet_page
+              onTap: () => Get.toNamed(Routes.edit), // Vers edit_sheet_page
             ),
             _buildSettingsItem(
               icon: Icons.lock_outline,
@@ -106,7 +106,7 @@ class SettingsPage extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha:0.02), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       child: Column(children: children),

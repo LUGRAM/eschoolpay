@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../app/router/app_pages.dart';
+import '../../../app/router/routes.dart';
 
 class HomeContent extends StatelessWidget {
   const HomeContent({super.key});
@@ -48,7 +48,7 @@ Widget _buildYearSelector() {
       color: primaryBlue,
       borderRadius: BorderRadius.circular(15),
       boxShadow: [
-        BoxShadow(color: primaryBlue.withOpacity(0.3),
+        BoxShadow(color: primaryBlue.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 5))
       ],
@@ -103,10 +103,10 @@ Widget _actionCard(String title, IconData icon, Color bg,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.black.withOpacity(0.05)),
+          border: Border.all(color: Colors.black.withValues(alpha:0.05)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha:0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -142,7 +142,7 @@ Widget _buildPaymentList() {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha:0.8),
             borderRadius: BorderRadius.circular(18),
           ),
           child: Row(

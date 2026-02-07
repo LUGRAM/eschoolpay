@@ -48,10 +48,10 @@ class TransportStartPage extends StatelessWidget {
                         return Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.1),
+                            color: Colors.orange.withValues(alpha:0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.orange.withOpacity(0.3),
+                              color: Colors.orange.withValues(alpha:0.3),
                             ),
                           ),
                           child: Row(
@@ -71,7 +71,7 @@ class TransportStartPage extends StatelessWidget {
                       }
 
                       return DropdownButtonFormField<ChildModel>(
-                        value: feesCtrl.selectedChild.value,
+                        initialValue: feesCtrl.selectedChild.value,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           contentPadding: EdgeInsets.symmetric(
@@ -115,10 +115,10 @@ class TransportStartPage extends StatelessWidget {
                         return Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.1),
+                            color: Colors.grey.withValues(alpha:0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.grey.withOpacity(0.3),
+                              color: Colors.grey.withValues(alpha:0.3),
                             ),
                           ),
                           child: const Text(
@@ -135,10 +135,10 @@ class TransportStartPage extends StatelessWidget {
                         return Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: Colors.red.withValues(alpha:0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.red.withOpacity(0.3),
+                              color: Colors.red.withValues(alpha:0.3),
                             ),
                           ),
                           child: Row(
@@ -169,12 +169,12 @@ class TransportStartPage extends StatelessWidget {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
                                 color: selected
-                                    ? AppColors.primarySoft.withOpacity(0.1)
-                                    : Colors.grey.withOpacity(0.05),
+                                    ? AppColors.primarySoft.withValues(alpha:0.1)
+                                    : Colors.grey.withValues(alpha:0.05),
                                 border: Border.all(
                                   color: selected
                                       ? AppColors.primarySoft
-                                      : Colors.grey.withOpacity(0.3),
+                                      : Colors.grey.withValues(alpha:0.3),
                                   width: 2,
                                 ),
                               ),
@@ -255,13 +255,13 @@ class TransportStartPage extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: amount > 0
-                            ? AppColors.primarySoft.withOpacity(0.1)
-                            : Colors.grey.withOpacity(0.05),
+                            ? AppColors.primarySoft.withValues(alpha:0.1)
+                            : Colors.grey.withValues(alpha:0.05),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: amount > 0
                               ? AppColors.primarySoft
-                              : Colors.grey.withOpacity(0.2),
+                              : Colors.grey.withValues(alpha:0.2),
                           width: 2,
                         ),
                       ),

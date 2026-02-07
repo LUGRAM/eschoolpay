@@ -6,9 +6,6 @@ import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/app_text_field.dart';
 import '../../../app/widgets/gradient_button.dart';
 
-import '../../schools/controllers/schools_controller.dart';
-import '../../schools/models/class_level_model.dart';
-
 import '../controllers/children_controller.dart';
 import '../models/child_model.dart';
 
@@ -20,13 +17,18 @@ class AddChildPage extends StatefulWidget {
 }
 
 class _AddChildPageState extends State<AddChildPage> {
+  final _formKey = GlobalKey<FormState>();
+
   final prenomCtrl = TextEditingController();
   final nomCtrl = TextEditingController();
   final dateNaissCtrl = TextEditingController();
   final lieuNaissCtrl = TextEditingController();
 
-  final ChildrenController childrenCtrl = Get.put(ChildrenController());
+  final ChildrenController childrenCtrl = Get.find<ChildrenController>();
 
+  //  Regex de validation
+  final RegExp _nameRegExp = RegExp(r"^[a-zA-ZÀ-ÿ\s\-']{2,30}$");
+  final RegExp _placeRegExp = RegExp(r"^[a-zA-ZÀ-ÿ0-9\s\-,']{2,50}$");
 
   @override
   void dispose() {
@@ -51,9 +53,9 @@ class _AddChildPageState extends State<AddChildPage> {
             const Text(
               "Photo de profil",
               style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -84,64 +86,86 @@ class _AddChildPageState extends State<AddChildPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text("Ajouter un enfant", style: TextStyle(fontWeight: FontWeight.w700)),
+        title: const Text(
+          "Ajouter un enfant",
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: AppColors.border, width: 1.4),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.borderGlow.withValues(alpha: 0.2),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // Avatar + Action Photo
-                GestureDetector(
-                  onTap: _openPhotoOptions,
-                  child: Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      Container(
-                        height: 110, width: 110,
-                        decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE8F1F7)),
-                        child: Lottie.asset(
-                          "assets/lotties/children_animation.json",
-                          height: 140,
-                          errorBuilder: (_, __, ___) => const Icon(Icons.child_care, size: 60),
-                        ),
-                      ),
-                      const CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Color(0xFF063D66),
-                        child: Icon(Icons.camera_alt, size: 16, color: Colors.white),
-                      )
-                    ],
+          child: Form(
+            key: _formKey,
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: AppColors.border, width: 1.4),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.borderGlow.withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
-                ),
-                const SizedBox(height: 8),
-                const Text("Modifier la photo", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                ],
+              ),
+              child: Column(
+                children: [
+                  // Avatar + Action Photo
+                  GestureDetector(
+                    onTap: _openPhotoOptions,
+                    child: Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        Container(
+                          height: 110,
+                          width: 110,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFFE8F1F7),
+                          ),
+                          child: Lottie.asset(
+                            "assets/lotties/children_animation.json",
+                            height: 140,
+                            errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.child_care, size: 60),
+                          ),
+                        ),
+                        const CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Color(0xFF063D66),
+                          child: Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                        )
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Modifier la photo",
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 24),
 
-                const SizedBox(height: 24),
-
-                _buildField("Prénom", prenomCtrl, Icons.person),
-                _buildField("Nom", nomCtrl, Icons.person_outline),
-
-                // Date de Naissance avec DatePicker
-                _buildField(
+                  // Champs avec validation
+                  _buildField(
+                    "Prénom",
+                    prenomCtrl,
+                    Icons.person,
+                    validator: _validateName,
+                  ),
+                  _buildField(
+                    "Nom",
+                    nomCtrl,
+                    Icons.person_outline,
+                    validator: _validateName,
+                  ),
+                  _buildField(
                     "Date de naissance",
                     dateNaissCtrl,
                     Icons.calendar_today,
                     readOnly: true,
+                    validator: _validateDate,
                     onTap: () async {
                       DateTime? picked = await showDatePicker(
                         context: context,
@@ -150,20 +174,26 @@ class _AddChildPageState extends State<AddChildPage> {
                         lastDate: DateTime.now(),
                       );
                       if (picked != null) {
-                        dateNaissCtrl.text = "${picked.day}/${picked.month}/${picked.year}";
+                        dateNaissCtrl.text =
+                        "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
                       }
-                    }
-                ),
+                    },
+                  ),
+                  _buildField(
+                    "Lieu de naissance",
+                    lieuNaissCtrl,
+                    Icons.location_on_outlined,
+                    validator: _validatePlace,
+                  ),
 
-                _buildField("Lieu de naissance", lieuNaissCtrl, Icons.location_on_outlined),
+                  const SizedBox(height: 26),
 
-                const SizedBox(height: 26),
-
-                GradientButton(
-                  label: "Enregistrer l'enfant",
-                  onTap: _submit,
-                ),
-              ],
+                  GradientButton(
+                    label: "Enregistrer l'enfant",
+                    onTap: _submit,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -171,7 +201,42 @@ class _AddChildPageState extends State<AddChildPage> {
     );
   }
 
-  Widget _buildField(String label, TextEditingController ctrl, IconData icon, {bool readOnly = false, VoidCallback? onTap}) {
+  // Validateurs
+  String? _validateName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Ce champ est obligatoire";
+    }
+    if (!_nameRegExp.hasMatch(value.trim())) {
+      return "Lettres uniquement (2-30 caractères)";
+    }
+    return null;
+  }
+
+  String? _validateDate(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Veuillez sélectionner une date";
+    }
+    return null;
+  }
+
+  String? _validatePlace(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Ce champ est obligatoire";
+    }
+    if (!_placeRegExp.hasMatch(value.trim())) {
+      return "Format invalide (2-50 caractères)";
+    }
+    return null;
+  }
+
+  Widget _buildField(
+      String label,
+      TextEditingController ctrl,
+      IconData icon, {
+        bool readOnly = false,
+        VoidCallback? onTap,
+        String? Function(String?)? validator,
+      }) {
     return Column(
       children: [
         _Label(label),
@@ -181,22 +246,19 @@ class _AddChildPageState extends State<AddChildPage> {
           prefixIcon: Icon(icon),
           readOnly: readOnly,
           onTap: onTap,
+          validator: validator,
         ),
         const SizedBox(height: 14),
       ],
     );
   }
 
-// Dans lib/features/children/pages/add_child_page.dart
-
+  // Soumission optimisée
   void _submit() {
     FocusScope.of(context).unfocus();
 
-    if (prenomCtrl.text.trim().isEmpty ||
-        nomCtrl.text.trim().isEmpty ||
-        dateNaissCtrl.text.trim().isEmpty ||
-        lieuNaissCtrl.text.trim().isEmpty) {
-      Get.snackbar("Erreur", "Tous les champs sont obligatoires");
+    // Validation du formulaire
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -208,13 +270,31 @@ class _AddChildPageState extends State<AddChildPage> {
       birthPlace: lieuNaissCtrl.text.trim(),
     );
 
+    // ✅ Ajout silencieux (pas de snackbar ici)
     childrenCtrl.addChild(newChild);
 
-    // ✅ navigation claire et sûre
-    Get.offNamed('/children');
-  }
+    // ✅ Navigation immédiate
+    Get.back();
 
-}/// Label simple et cohérent
+    Future.microtask(() {
+      Get.showSnackbar(
+          GetSnackBar(
+            title: "Succès",
+            message: "${newChild.firstName} a été ajouté(e)",
+            duration: const Duration(seconds: 2),
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.green.shade800.withValues(alpha: 0.7),
+            barBlur: 20,
+            borderRadius: 12,
+            margin: const EdgeInsets.all(16),
+            icon: const Icon(Icons.check_circle, color: Colors.white),
+          ),
+      );
+    });
+  }
+}
+
+/// Label simple et cohérent
 class _Label extends StatelessWidget {
   final String text;
   const _Label(this.text);
