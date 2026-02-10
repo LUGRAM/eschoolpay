@@ -29,7 +29,7 @@ class SettingsPage extends StatelessWidget {
             _buildSettingsItem(
               icon: Icons.person_outline,
               title: "Informations personnelles",
-              onTap: () => Get.toNamed(Routes.edit), // Vers edit_sheet_page
+              onTap: () => Get.toNamed(Routes.editSheet), // Vers edit_sheet_page
             ),
             _buildSettingsItem(
               icon: Icons.lock_outline,

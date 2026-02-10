@@ -4,14 +4,13 @@ abstract class Routes {
 
   static const authWelcome = '/auth/welcome';
   static const phoneSignup = '/auth/phone-signup';
+  static const phoneSignin = '/auth/phone-signin';
 
   static const home = '/home';
 
   static const childrenList = '/children';
   static const addChild = '/children/add';
-
   static const servicesMenu = '/services-menu';
-
   static const feesStart = '/fees';
   static const feesPreview = '/fees/preview';
   static const feesSuccess = '/fees/success';
@@ -21,10 +20,6 @@ abstract class Routes {
   static const transportStart = '/fees/transport';
   static const payment = '/payment';
   static const childPaymentHistory  = '/fees/history';
-
-
-  static const paymentRegistration = '/payment/registration';
-  static const paymentFees = '/payment/fees';
-
+  static const editSheet = '/editq';
   static const faq = '/faq';
 }

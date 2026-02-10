@@ -16,8 +16,7 @@ class PhoneSignupPage extends StatefulWidget {
 class _PhoneSignupPageState extends State<PhoneSignupPage> {
   final _phoneCtrl = TextEditingController();
   bool _isLoading = false;
-  bool _acceptedTerms = false;
-  String? _errorMessage; // ✅ Message d'erreur externe
+  String? _errorMessage;
 
   @override
   void dispose() {
