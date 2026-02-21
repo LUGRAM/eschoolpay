@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../app/router/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/app_text_field.dart';
+import '../controllers/auth_controller.dart'; // ✅ ajuste le chemin selon ton projet
 
 class PhoneSigninPage extends StatefulWidget {
   const PhoneSigninPage({super.key});
@@ -15,8 +16,17 @@ class PhoneSigninPage extends StatefulWidget {
 
 class _PhoneSigninPageState extends State<PhoneSigninPage> {
   final _phoneCtrl = TextEditingController();
+
   bool _isLoading = false;
-  String? _errorMessage; // ✅ Message d'erreur externe
+  String? _errorMessage;
+
+  late final AuthController _authCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _authCtrl = Get.find<AuthController>(); // ✅ connecté au controller
+  }
 
   @override
   void dispose() {
@@ -54,7 +64,6 @@ class _PhoneSigninPageState extends State<PhoneSigninPage> {
             ),
             const SizedBox(height: 40),
 
-            // Label du champ
             const Text(
               "Numéro de téléphone",
               style: TextStyle(
@@ -63,10 +72,8 @@ class _PhoneSigninPageState extends State<PhoneSigninPage> {
                 color: AppColors.textPrimary,
               ),
             ),
-
             const SizedBox(height: 12),
 
-            // ✅ Champ sans validation interne
             AppTextField(
               hint: "07x xx xx xx",
               prefixIcon: const Icon(Icons.phone),
@@ -78,7 +85,6 @@ class _PhoneSigninPageState extends State<PhoneSigninPage> {
               ],
             ),
 
-            // ✅ Label d'erreur externe
             if (_errorMessage != null) ...[
               const SizedBox(height: 8),
               Row(
@@ -105,7 +111,6 @@ class _PhoneSigninPageState extends State<PhoneSigninPage> {
 
             const SizedBox(height: 32),
 
-            // Bouton de connexion
             SizedBox(
               width: double.infinity,
               height: 60,
@@ -141,7 +146,6 @@ class _PhoneSigninPageState extends State<PhoneSigninPage> {
 
             const SizedBox(height: 24),
 
-            // Lien vers inscription
             Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -184,51 +188,48 @@ class _PhoneSigninPageState extends State<PhoneSigninPage> {
     );
   }
 
-  // ✅ Validation qui retourne le message d'erreur ou null
   String? _validatePhone(String value) {
-    if (value.trim().isEmpty) {
-      return "Numéro de téléphone requis";
-    }
+    if (value.trim().isEmpty) return "Numéro de téléphone requis";
 
     final cleanPhone = value.replaceAll(' ', '');
-
-    if (cleanPhone.length != 9) {
-      return "Le numéro doit contenir 9 chiffres";
-    }
+    if (cleanPhone.length != 9) return "Le numéro doit contenir 9 chiffres";
 
     final validPrefixes = ['077', '066', '065', '074', '011', '062'];
     final prefix = cleanPhone.substring(0, 3);
 
-    if (!validPrefixes.contains(prefix)) {
-      return "Numéro incorrect";
-    }
-
+    if (!validPrefixes.contains(prefix)) return "Numéro incorrect";
     return null;
   }
 
   Future<void> _handleSignin() async {
     FocusScope.of(context).unfocus();
 
-    // ✅ Validation manuelle et mise à jour du message d'erreur
     final error = _validatePhone(_phoneCtrl.text);
 
-    setState(() {
-      _errorMessage = error;
-    });
-
-    if (error != null) {
-      return;
-    }
+    setState(() => _errorMessage = error);
+    if (error != null) return;
 
     setState(() => _isLoading = true);
 
-    await Future.delayed(const Duration(seconds: 2));
-
-    setState(() => _isLoading = false);
-
     final fullPhone = _phoneCtrl.text.replaceAll(' ', '');
 
-    Get.offAllNamed(Routes.home, arguments: {'phone': fullPhone});
+    try {
+      // ✅ Appel réel au controller (login)
+      // NOTE: ton backend login demande password.
+      // Si tu veux "phone-only", il faut changer l’API en OTP / code.
+      // Ici on redirige vers la page password/otp si tu en as une.
+      final ok = await _authCtrl.login(phone: fullPhone, password: ""); // ⚠️ à remplacer (OTP / password)
+
+      if (ok) {
+        Get.offAllNamed(Routes.home, arguments: {'phone': fullPhone});
+      } else {
+        setState(() => _errorMessage = "Connexion impossible. Vérifie tes informations.");
+      }
+    } catch (_) {
+      setState(() => _errorMessage = "Erreur réseau. Réessaie.");
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 }
 
@@ -236,7 +237,9 @@ class _PhoneSigninPageState extends State<PhoneSigninPage> {
 class LibellePhoneFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
     final text = newValue.text.replaceAll(' ', '');
     if (text.length > 9) return oldValue;
 
