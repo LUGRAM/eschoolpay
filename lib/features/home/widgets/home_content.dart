@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../app/router/routes.dart';
+import 'build_year_selector.dart';
 
 class HomeContent extends StatelessWidget {
   const HomeContent({super.key});
@@ -18,7 +19,7 @@ class HomeContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildYearSelector(), // À transformer en widget ou méthode statique
+              buildYearSelector(), // À transformer en widget ou méthode statique
               const SizedBox(height: 25),
               _buildQuickActions(),
               const SizedBox(height: 25),
@@ -37,37 +38,6 @@ class HomeContent extends StatelessWidget {
       ],
     );
   }
-}
-
-Widget _buildYearSelector() {
-  final Color primaryBlue = const Color(0xFF063D66);
-
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-    decoration: BoxDecoration(
-      color: primaryBlue,
-      borderRadius: BorderRadius.circular(15),
-      boxShadow: [
-        BoxShadow(color: primaryBlue.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5))
-      ],
-    ),
-    child: DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        value: "2024-2025",
-        dropdownColor: primaryBlue,
-        icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-        style: const TextStyle(
-            color: Colors.white, fontWeight: FontWeight.bold),
-        items: ["2023-2024", "2024-2025"].map((String value) {
-          return DropdownMenuItem<String>(
-              value: value, child: Text("Année scolaire : $value"));
-        }).toList(),
-        onChanged: (_) {},
-      ),
-    ),
-  );
 }
 
 Widget _buildQuickActions() {

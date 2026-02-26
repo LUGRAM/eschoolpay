@@ -1,41 +1,52 @@
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/services/annee_scolaire_service.dart';
 import '../models/annee_scolaire.dart';
 
 class AnneeScolaireController extends GetxController {
-
   final AnneeScolaireService service;
 
   AnneeScolaireController(this.service);
 
-  var schoolYears = <AnneeScolaire>[].obs;
-  var selectedYear = Rxn<AnneeScolaire>();
-  var isLoading = false.obs;
-  static final GetStorage _box = GetStorage();
-
-  // =====================================================
-  // TOKEN CENTRALISÉ
-  // =====================================================
-  static String? get _token =>
-      _box.read("auth_token") ?? _box.read("token");
+  final schoolYears = <AnneeScolaire>[].obs;
+  final selectedYear = Rxn<AnneeScolaire>();
+  final isLoading = false.obs;
 
   @override
   void onInit() {
-    fetchYears(_token);
     super.onInit();
+    fetchYears();
   }
 
-  void fetchYears(String? token) async {
+  Future<void> fetchYears() async {
     try {
       isLoading.value = true;
-      final years = await service.fetchSchoolYears(token!);
+
+      final years = await service.fetchSchoolYears();
       schoolYears.assignAll(years);
-      selectedYear.value = years.first;
+
+      await _restoreYear();
+
+      selectedYear.value ??= schoolYears.isNotEmpty ? schoolYears.first : null;
     } catch (e) {
-      print(e);
+      print("fetchYears error: $e");
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> setSelectedYear(AnneeScolaire year) async {
+    selectedYear.value = year;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('selected_year_id', year.id);
+  }
+
+  Future<void> _restoreYear() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedId = prefs.getInt('selected_year_id');
+
+    if (savedId != null) {
+      selectedYear.value = schoolYears.firstWhereOrNull((y) => y.id == savedId);
     }
   }
 }

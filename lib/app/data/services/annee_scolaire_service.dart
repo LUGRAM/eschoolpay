@@ -1,29 +1,23 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import '../../../core/network/api_client.dart';
 import '../../models/annee_scolaire.dart';
 
 class AnneeScolaireService {
+  Future<List<AnneeScolaire>> fetchSchoolYears() async {
+    final response = await ApiClient.get("/annees");
 
-  final String baseUrl;
-
-  AnneeScolaireService({required this.baseUrl});
-
-  Future<List<AnneeScolaire>> fetchSchoolYears(String token) async {
-    final response = await http.get(
-      Uri.parse("$baseUrl/school-years"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Accept": "application/json"
-      },
-    );
+    // des Logs
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return (data['data'] as List)
-          .map((e) => AnneeScolaire.fromJson(e))
-          .toList();
-    } else {
-      throw Exception("Erreur chargement années scolaires");
+      final decoded = jsonDecode(response.body);
+
+      final List list = decoded;
+
+      return list.map((e) => AnneeScolaire.fromJson(e)).toList();
     }
+
+    throw Exception("Erreur chargement années scolaires (${response.statusCode})");
   }
 }
