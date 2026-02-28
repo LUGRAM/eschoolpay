@@ -7,6 +7,7 @@ import '../../../app/router/routes.dart';
 class AuthController extends GetxController {
   final AuthService _service = AuthService();
   final GetStorage _storage = GetStorage();
+  int? get userId => _storage.read('user_id');
 
   final isLoading = false.obs;
 

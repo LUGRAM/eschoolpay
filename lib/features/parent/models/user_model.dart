@@ -1,4 +1,4 @@
-// lib/app/data/models/user_model.dart
+// lib/app/data/models/user_model.dart, c'est le parent
 class UserModel {
   String id;
   String name;

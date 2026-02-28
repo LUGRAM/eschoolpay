@@ -1,11 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/app_text_field.dart';
 import '../../../app/widgets/gradient_button.dart';
-
+import '../../auth/controllers/auth_controller.dart';
 import '../controllers/children_controller.dart';
 import '../models/child_model.dart';
 
@@ -19,16 +21,22 @@ class AddChildPage extends StatefulWidget {
 class _AddChildPageState extends State<AddChildPage> {
   final _formKey = GlobalKey<FormState>();
 
+  final authCtrl = Get.find<AuthController>();
+  late final int parentId = authCtrl.userId!;
+
+  final ChildrenController childrenCtrl = Get.find<ChildrenController>();
+
   final prenomCtrl = TextEditingController();
   final nomCtrl = TextEditingController();
   final dateNaissCtrl = TextEditingController();
   final lieuNaissCtrl = TextEditingController();
 
-  final ChildrenController childrenCtrl = Get.find<ChildrenController>();
-
-  //  Regex de validation
+  // Regex
   final RegExp _nameRegExp = RegExp(r"^[a-zA-ZÀ-ÿ\s\-']{2,30}$");
   final RegExp _placeRegExp = RegExp(r"^[a-zA-ZÀ-ÿ0-9\s\-,']{2,50}$");
+
+  String _sexe = "M"; // M/F
+  String? _photoPath; // chemin local après crop
 
   @override
   void dispose() {
@@ -37,6 +45,12 @@ class _AddChildPageState extends State<AddChildPage> {
     dateNaissCtrl.dispose();
     lieuNaissCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickAndCrop(ImageSource source) async {
+    final path = await childrenCtrl.pickAndCrop(source: source);
+    if (!mounted) return;
+    if (path != null) setState(() => _photoPath = path);
   }
 
   void _openPhotoOptions() {
@@ -59,22 +73,36 @@ class _AddChildPageState extends State<AddChildPage> {
               ),
             ),
             const SizedBox(height: 16),
+
             ListTile(
               leading: const Icon(Icons.photo_library, color: Color(0xFF063D66)),
               title: const Text("Importer une photo"),
-              onTap: () {
+              onTap: () async {
                 Get.back();
-                // childrenCtrl.pickImage(ImageSource.gallery);
+                await _pickAndCrop(ImageSource.gallery);
               },
             ),
+
             ListTile(
               leading: const Icon(Icons.camera_alt, color: Color(0xFF063D66)),
               title: const Text("Prendre une photo"),
-              onTap: () {
+              onTap: () async {
                 Get.back();
-                // childrenCtrl.pickImage(ImageSource.camera);
+                await _pickAndCrop(ImageSource.camera);
               },
             ),
+
+            if (_photoPath != null) ...[
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: const Text("Retirer la photo"),
+                onTap: () {
+                  Get.back();
+                  setState(() => _photoPath = null);
+                },
+              ),
+            ],
           ],
         ),
       ),
@@ -86,10 +114,7 @@ class _AddChildPageState extends State<AddChildPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          "Ajouter un enfant",
-          style: TextStyle(fontWeight: FontWeight.w700),
-        ),
+        title: const Text("Ajouter un enfant", style: TextStyle(fontWeight: FontWeight.w700)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -102,17 +127,10 @@ class _AddChildPageState extends State<AddChildPage> {
                 color: AppColors.card,
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(color: AppColors.border, width: 1.4),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.borderGlow.withValues(alpha: 0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
               child: Column(
                 children: [
-                  // Avatar + Action Photo
+                  // Avatar
                   GestureDetector(
                     onTap: _openPhotoOptions,
                     child: Stack(
@@ -125,11 +143,20 @@ class _AddChildPageState extends State<AddChildPage> {
                             shape: BoxShape.circle,
                             color: Color(0xFFE8F1F7),
                           ),
-                          child: Lottie.asset(
-                            "assets/lotties/children_animation.json",
-                            height: 140,
-                            errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.child_care, size: 60),
+                          child: ClipOval(
+                            child: _photoPath != null
+                                ? Image.file(
+                              File(_photoPath!),
+                              fit: BoxFit.cover,
+                              width: 110,
+                              height: 110,
+                            )
+                                : Lottie.asset(
+                              "assets/lotties/children_animation.json",
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                              const Icon(Icons.child_care, size: 60),
+                            ),
                           ),
                         ),
                         const CircleAvatar(
@@ -141,25 +168,18 @@ class _AddChildPageState extends State<AddChildPage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    "Modifier la photo",
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  Text(
+                    _photoPath == null ? "Ajouter une photo" : "Modifier la photo",
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 18),
 
-                  // Champs avec validation
-                  _buildField(
-                    "Prénom",
-                    prenomCtrl,
-                    Icons.person,
-                    validator: _validateName,
-                  ),
-                  _buildField(
-                    "Nom",
-                    nomCtrl,
-                    Icons.person_outline,
-                    validator: _validateName,
-                  ),
+                  // Sexe
+                  _buildSexeSelector(),
+
+                  // Champs
+                  _buildField("Prénom", prenomCtrl, Icons.person, validator: _validateName),
+                  _buildField("Nom", nomCtrl, Icons.person_outline, validator: _validateName),
                   _buildField(
                     "Date de naissance",
                     dateNaissCtrl,
@@ -167,7 +187,7 @@ class _AddChildPageState extends State<AddChildPage> {
                     readOnly: true,
                     validator: _validateDate,
                     onTap: () async {
-                      DateTime? picked = await showDatePicker(
+                      final picked = await showDatePicker(
                         context: context,
                         initialDate: DateTime.now(),
                         firstDate: DateTime(2000),
@@ -179,14 +199,10 @@ class _AddChildPageState extends State<AddChildPage> {
                       }
                     },
                   ),
-                  _buildField(
-                    "Lieu de naissance",
-                    lieuNaissCtrl,
-                    Icons.location_on_outlined,
-                    validator: _validatePlace,
-                  ),
+                  _buildField("Lieu de naissance", lieuNaissCtrl, Icons.location_on_outlined,
+                      validator: _validatePlace),
 
-                  const SizedBox(height: 26),
+                  const SizedBox(height: 22),
 
                   GradientButton(
                     label: "Enregistrer l'enfant",
@@ -201,31 +217,50 @@ class _AddChildPageState extends State<AddChildPage> {
     );
   }
 
-  // Validateurs
+  Widget _buildSexeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _Label("Sexe"),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            Expanded(
+              child: ChoiceChip(
+                label: const Text("Masculin"),
+                selected: _sexe == "M",
+                onSelected: (_) => setState(() => _sexe = "M"),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: ChoiceChip(
+                label: const Text("Féminin"),
+                selected: _sexe == "F",
+                onSelected: (_) => setState(() => _sexe = "F"),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+      ],
+    );
+  }
+
   String? _validateName(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "Ce champ est obligatoire";
-    }
-    if (!_nameRegExp.hasMatch(value.trim())) {
-      return "Lettres uniquement (2-30 caractères)";
-    }
+    if (value == null || value.trim().isEmpty) return "Ce champ est obligatoire";
+    if (!_nameRegExp.hasMatch(value.trim())) return "Lettres uniquement (2-30 caractères)";
     return null;
   }
 
   String? _validateDate(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "Veuillez sélectionner une date";
-    }
+    if (value == null || value.trim().isEmpty) return "Veuillez sélectionner une date";
     return null;
   }
 
   String? _validatePlace(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "Ce champ est obligatoire";
-    }
-    if (!_placeRegExp.hasMatch(value.trim())) {
-      return "Format invalide (2-50 caractères)";
-    }
+    if (value == null || value.trim().isEmpty) return "Ce champ est obligatoire";
+    if (!_placeRegExp.hasMatch(value.trim())) return "Format invalide (2-50 caractères)";
     return null;
   }
 
@@ -253,48 +288,34 @@ class _AddChildPageState extends State<AddChildPage> {
     );
   }
 
-  // Soumission optimisée
-  void _submit() {
+  Future<void> _submit() async {
     FocusScope.of(context).unfocus();
-
-    // Validation du formulaire
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     final newChild = ChildModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
       firstName: prenomCtrl.text.trim(),
       lastName: nomCtrl.text.trim(),
       birthDate: dateNaissCtrl.text.trim(),
       birthPlace: lieuNaissCtrl.text.trim(),
+      sexe: _sexe,
+      matricule: ChildModel.generateMatricule(),
+      parentId: parentId,
+      photoPath: _photoPath,
     );
 
-    // ✅ Ajout silencieux (pas de snackbar ici)
-    childrenCtrl.addChild(newChild);
-
-    // ✅ Navigation immédiate
-    Get.back();
-
-    Future.microtask(() {
-      Get.showSnackbar(
-          GetSnackBar(
-            title: "Succès",
-            message: "${newChild.firstName} a été ajouté(e)",
-            duration: const Duration(seconds: 2),
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.green.shade800.withValues(alpha: 0.7),
-            barBlur: 20,
-            borderRadius: 12,
-            margin: const EdgeInsets.all(16),
-            icon: const Icon(Icons.check_circle, color: Colors.white),
-          ),
-      );
-    });
+    final success = await childrenCtrl.createChild(newChild);
+    if (!mounted) return;
+    if (success) {
+      Get.back();
+      Get.showSnackbar(const GetSnackBar(
+        message: "Enfant ajouté avec succès",
+        duration: Duration(seconds: 2),
+        snackPosition: SnackPosition.TOP,
+      ));
+    }
   }
 }
 
-/// Label simple et cohérent
 class _Label extends StatelessWidget {
   final String text;
   const _Label(this.text);

@@ -52,32 +52,37 @@ class FeesController extends GetxController {
   // ─────────────────────────────────────────────────────
   List<MonthlyFeeOption> get availableMonthlyOptions {
     final child = selectedChild.value;
-    if (child == null || child.schoolId == null || child.grade == null) {
-      return [];
-    }
+    if (child == null) return [];
+
+    final schoolId = child.extras["school_id"];
+    final grade = child.extras["grade"];
+
+    if (schoolId == null || grade == null) return [];
 
     return mockMonthlyFees
-        .where((c) => c.schoolId == child.schoolId && c.level == child.grade)
+        .where((c) => c.schoolId == schoolId && c.level == grade)
         .expand((c) => c.options)
         .toList();
   }
 
   List<CantineOption> get availableCantineOptions {
     final child = selectedChild.value;
-    if (child == null || child.schoolId == null) return [];
+    if (child == null) return [];
 
-    return cantineOptions
-        .where((o) => o.schoolId == child.schoolId)
-        .toList();
+    final schoolId = child.extras["school_id"];
+    if (schoolId == null) return [];
+
+    return cantineOptions.where((o) => o.schoolId == schoolId).toList();
   }
 
   List<TransportOption> get availableTransportOptions {
     final child = selectedChild.value;
-    if (child == null || child.schoolId == null) return [];
+    if (child == null) return [];
 
-    return transportOptions
-        .where((o) => o.schoolId == child.schoolId)
-        .toList();
+    final schoolId = child.extras["school_id"];
+    if (schoolId == null) return [];
+
+    return transportOptions.where((o) => o.schoolId == schoolId).toList();
   }
 
   // ─────────────────────────────────────────────────────
@@ -139,7 +144,7 @@ class FeesController extends GetxController {
 
     final record = PaymentRecordModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      childId: child.id,
+      childId: child.id as String,
       childName: child.fullName,
       feeLabel: label,
       amount: totalAmount,
