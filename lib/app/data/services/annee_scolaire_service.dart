@@ -12,9 +12,7 @@ class AnneeScolaireService {
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);
-
       final List list = decoded;
-
       return list.map((e) => AnneeScolaire.fromJson(e)).toList();
     }
 

@@ -41,7 +41,7 @@ class AnneeScolaireController extends GetxController {
     await prefs.setInt('selected_year_id', year.id);
   }
 
-  Future<void> _restoreYear() async {
+  Future<void>_restoreYear() async {
     final prefs = await SharedPreferences.getInstance();
     final savedId = prefs.getInt('selected_year_id');
 

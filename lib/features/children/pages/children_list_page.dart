@@ -42,8 +42,6 @@ class ChildrenListPage extends StatelessWidget {
   }
 }
 
-
-
 class _EmptyState extends StatelessWidget {
   final VoidCallback onAdd;
 
@@ -81,20 +79,16 @@ class _EmptyState extends StatelessWidget {
             label: const Text("Ajouter un enfant"),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primarySoft,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14)),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 }
-
-
-
 
 class _ChildCard extends StatelessWidget {
   final dynamic child;
@@ -149,26 +143,20 @@ class _ChildCard extends StatelessWidget {
                 Text(
                   child.fullName,
                   style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16),
+                      fontWeight: FontWeight.w800, fontSize: 16),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     Icon(
-                      child.sexe == "M"
-                          ? Icons.male
-                          : Icons.female,
+                      child.sexe == "M" ? Icons.male : Icons.female,
                       size: 16,
                       color: AppColors.textMuted,
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      child.sexe == "M"
-                          ? "Garçon"
-                          : "Fille",
-                      style: const TextStyle(
-                          color: AppColors.textMuted),
+                      child.sexe == "M" ? "Garçon" : "Fille",
+                      style: const TextStyle(color: AppColors.textMuted),
                     ),
                   ],
                 ),

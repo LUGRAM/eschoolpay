@@ -1,4 +1,4 @@
-import '../models/school_resistration_fee_model.dart';
+/*import '../models/school_resistration_fee_model.dart';
 
 const mockRegistrationFees = [
   // Lycée Léon Mba
@@ -25,3 +25,4 @@ const mockRegistrationFees = [
     amount: 40000,
   ),
 ];
+*/

@@ -188,36 +188,33 @@ class _PaymentPageState extends State<PaymentPage> {
   // DÉTECTION DU CONTEXTE
   // ─────────────────────────────────────────────────────
   PaymentContext _detectContext() {
-    try {
+    if (Get.isRegistered<RegistrationController>()) {
       final regCtrl = Get.find<RegistrationController>();
-      if (regCtrl.selectedFee.value != null) {
+      if (regCtrl.selectedChild.value != null) {
         return PaymentContext.inscription;
       }
-    } catch (_) {}
+    }
 
-    try {
-      final feesCtrl = Get.find<FeesController>();
-      if (feesCtrl.selected.value != null) {
-        return PaymentContext.fees;
-      }
-    } catch (_) {}
+    if (Get.isRegistered<FeesController>()) {
+      return PaymentContext.fees;
+    }
 
-    return PaymentContext.fees; // Défaut
+    return PaymentContext.fees;
   }
 
   // ─────────────────────────────────────────────────────
   // RÉCUPÉRATION DU MONTANT
   // ─────────────────────────────────────────────────────
   int _getAmount(PaymentContext context) {
+    final args = Get.arguments ?? {};
+
     if (context == PaymentContext.inscription) {
-      final regCtrl = Get.find<RegistrationController>();
-      return regCtrl.totalAmount.value;
+      return args['amount'] ?? 25000; // valeur temporaire si non fourni
     } else {
       final feesCtrl = Get.find<FeesController>();
       return feesCtrl.totalAmount;
     }
   }
-
   // ─────────────────────────────────────────────────────
   // VALIDATION DU NUMÉRO DE TÉLÉPHONE
   // ─────────────────────────────────────────────────────
@@ -260,41 +257,36 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<void> _processPayment(PaymentContext context) async {
     FocusScope.of(this.context).unfocus();
 
-    // Validation du formulaire (sauf si espèces)
     if (method != 'Espèces') {
-      if (!_formKey.currentState!.validate()) {
-        return;
-      }
+      if (!_formKey.currentState!.validate()) return;
     }
 
     setState(() => loading = true);
 
-    await Future.delayed(const Duration(seconds: 2)); // Simulation
+    await Future.delayed(const Duration(seconds: 2));
 
     if (context == PaymentContext.inscription) {
-      _handleInscriptionPayment();
+      await _handleInscriptionPayment();
     } else {
-      _handleFeesPayment();
+      await _handleFeesPayment();
     }
   }
-
-  void _handleInscriptionPayment() {
+  Future<void> _handleInscriptionPayment() async {
     final regCtrl = Get.find<RegistrationController>();
-    final record = regCtrl.confirmRegistration();
+
+    await regCtrl.confirmRegistration();
 
     setState(() => loading = false);
 
-    Get.offNamed(Routes.feesSuccess, arguments: {
-      // CORRECTION : On vérifie la méthode pour envoyer le bon statut
-      'status': method == 'Espèces' ? 'PENDING' : 'SUCCESS',
-      'childName': record.childName,
-      'feeLabel': 'Inscription ${record.schoolName}',
-      'amount': record.amount,
-      'method': method,
-      'date': record.date,
-    });
+    Get.offNamed(
+      Routes.feesSuccess,
+      arguments: {
+        'status': method == 'Espèces' ? 'PENDING' : 'SUCCESS',
+        'service': 'inscription',
+        'method': method,
+      },
+    );
   }
-
   Future<void> _handleFeesPayment() async {
     final feesCtrl = Get.find<FeesController>();
     final record = await feesCtrl.payNow(method: method);

@@ -80,7 +80,8 @@ class AppPages {
       page: () => RegistrationStartPage(),
       bindings:[
         FeesBinding(),
-        ChildrenBinding()
+        ChildrenBinding(),
+        SchoolsBinding()
       ],
     ),
     GetPage(
