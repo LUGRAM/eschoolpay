@@ -47,7 +47,6 @@ class ChildModel {
   // API -> Model
   // -----------------------------
   factory ChildModel.fromApi(Map<String, dynamic> json) {
-    // date_naissance peut être "2025-10-01" ou ISO "2025-10-01T00:00:00.000000Z"
     final apiDate = (json['date_naissance'] ?? '').toString();
     final uiDate = _toUiDate(apiDate);
 
@@ -59,8 +58,14 @@ class ChildModel {
       birthPlace: (json['lieu_naissance'] ?? '').toString(),
       sexe: (json['sexe'] ?? 'M').toString(),
       matricule: (json['matricule'] ?? '').toString(),
-      parentId: int.tryParse(( json['parent_model_id'] ?? 0).toString()) ?? 0,
-      // photoUrl côté API (si tu veux l’afficher) -> à gérer séparément si besoin
+      parentId: int.tryParse((json['parent_model_id'] ?? 0).toString()) ?? 0,
+
+      extras: {
+        "school_id": (json['school_id'] ?? '').toString(),
+        "grade": (json['grade'] ?? '').toString(),
+        "academic_year": (json['academic_year'] ?? '').toString(),
+        "school_name": (json['school_name'] ?? '').toString(),
+      },
     );
   }
 
@@ -154,7 +159,7 @@ class ChildModel {
 
   // Ces getters garantissent un String non-nul pour tes widgets
   String get displaySchool => schoolName ?? "Non renseignée";
-  String get displayGrade => grade ?? "Classe non renseignée";
+  String get displayGrade => grade ?? "Niveau non renseignée";
 
 }
 

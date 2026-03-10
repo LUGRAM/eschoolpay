@@ -43,6 +43,25 @@ class ApiClient {
   }
 
   // ================= GET =================
+  static Future<http.Response> take(
+      String endpoint, {
+        Map<String, dynamic>? queryParameters,
+      }) async {
+
+    final uri = Uri.parse("$baseUrl$endpoint").replace(
+      queryParameters: queryParameters?.map(
+            (key, value) => MapEntry(key, value.toString()),
+      ),
+    );
+
+    final response = await http.get(
+      uri,
+      headers: jsonHeaders,
+    );
+
+    return response;
+  }
+
   static Future<http.Response> get(String endpoint) async {
     final response = await http.get(
       Uri.parse("$baseUrl$endpoint"),

@@ -27,8 +27,9 @@ class RegistrationController extends GetxController {
       isLoading.value = true;
 
       await service.createInscription(
+        ecoleId: int.parse(schoolsCtrl.selectedSchool.value!.id.toString()),
         eleveId: int.parse(selectedChild.value!.id!),
-        levelId: int.parse(schoolsCtrl.selectedLevel.value!.id as String),
+        levelId: int.parse(schoolsCtrl.selectedLevel.value!.id.toString()),
         anneeId: anneeCtrl.selectedYear.value!.id,
         frais: 25000,
       );

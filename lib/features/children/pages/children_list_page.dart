@@ -15,7 +15,6 @@ class ChildrenListPage extends StatelessWidget {
     return PageScaffold(
       title: "Mes enfants",
       child: Obx(() {
-
         if (c.isLoading.value) {
           return const Center(
             child: CircularProgressIndicator(),
@@ -75,8 +74,8 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: onAdd,
-            icon: const Icon(Icons.add),
-            label: const Text("Ajouter un enfant"),
+            icon: const Icon(Icons.add, color: Colors.white,),
+            label: const Text("Ajouter un enfant", style: TextStyle(color: Colors.white),),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primarySoft,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),

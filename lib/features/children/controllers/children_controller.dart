@@ -23,6 +23,7 @@ class ChildrenController extends GetxController {
   void onInit() {
     super.onInit();
 
+    print(isLoggedIn);
     //  Ne charge les enfants QUE si connecté
     if (isLoggedIn) {
       fetchChildren();

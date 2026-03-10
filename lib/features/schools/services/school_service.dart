@@ -15,4 +15,5 @@ class SchoolsService {
 
     throw Exception("Erreur chargement etablissements (${response.statusCode})");
   }
+
 }

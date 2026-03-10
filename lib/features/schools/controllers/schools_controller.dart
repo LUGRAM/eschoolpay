@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
+import '../../../core/network/api_client.dart';
 import '../models/level_model.dart';
 import '../models/school_model.dart';
 import '../services/level_service.dart';
@@ -18,6 +21,8 @@ class SchoolsController extends GetxController {
   final selectedLevel = Rxn<LevelModel>();
 
   final isLoading = false.obs;
+
+  var inscriptionFee = 0.0.obs;
 
   @override
   void onInit() {
@@ -51,5 +56,25 @@ class SchoolsController extends GetxController {
 
   void selectLevel(LevelModel level) {
     selectedLevel.value = level;
+  }
+
+  Future<void> loadInscriptionFee() async {
+    print("Chargement des frais inscription...");
+    if (selectedSchool.value == null || selectedLevel.value == null) return;
+
+    final response = await ApiClient.take(
+      '/frais-inscription',
+      queryParameters: {
+        "annee_scolaire_id": 1,
+        "ecole_id": selectedSchool.value!.id,
+        "classe_id": selectedLevel.value!.id,
+      },
+    );
+
+    final data = jsonDecode(response.body);
+
+    print(data);
+
+    inscriptionFee.value = double.tryParse(data["montant"].toString()) ?? 0;
   }
 }
