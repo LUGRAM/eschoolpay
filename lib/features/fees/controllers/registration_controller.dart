@@ -25,14 +25,33 @@ class RegistrationController extends GetxController {
 
     try {
       isLoading.value = true;
+      final child = selectedChild.value!;
+      final school = schoolsCtrl.selectedSchool.value!;
+      final level = schoolsCtrl.selectedLevel.value!;
+      final annee = anneeCtrl.selectedYear.value!;
 
-      await service.createInscription(
-        ecoleId: int.parse(schoolsCtrl.selectedSchool.value!.id.toString()),
-        eleveId: int.parse(selectedChild.value!.id!),
-        levelId: int.parse(schoolsCtrl.selectedLevel.value!.id.toString()),
-        anneeId: anneeCtrl.selectedYear.value!.id,
-        frais: 25000,
+      final result = await service.createInscription(
+        eleveId: int.parse(child.id!),
+        levelId: int.parse(level.id.toString()),
+        anneeId: annee.id,
+        ecoleId: int.parse(school.id.toString()),
+        frais: schoolsCtrl.inscriptionFee.value,
       );
+
+      // ✅ Mise à jour des extras de l'enfant avec les données d'inscription
+      final data = result['data'] ?? result;
+      final updatedExtras = {
+        ...child.extras,
+        "school_id": (data['ecole']?['id'] ?? school.id).toString(),
+        "school_name": (data['ecole']?['nom'] ?? school.name).toString(),
+        "grade": (data['niveau']?['nom'] ?? level.name).toString(),
+        "niveau_id": (data['niveau']?['id'] ?? level.id).toString(),
+        "academic_year": annee.annee_scolaire ?? "",
+      };
+
+      // ✅ Mise à jour dans ChildrenController
+      childrenCtrl.updateChildExtras(child.id!, updatedExtras);
+
     } finally {
       isLoading.value = false;
     }

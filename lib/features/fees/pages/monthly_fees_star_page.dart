@@ -66,7 +66,10 @@ class MonthlyFeesStartPage extends StatelessWidget {
                               .map((child) => DropdownMenuItem(
                             value: child,
                             child: Text(
-                                "${child.fullName} (${child.displayGrade})"),
+                              child.displayGrade.isNotEmpty
+                                  ? "${child.fullName} (${child.displayGrade})"
+                                  : child.fullName,
+                            ),
                           ))
                               .toList(),
                           onChanged: (child) {

@@ -119,4 +119,14 @@ class ChildrenController extends GetxController {
       return null;
     }
   }
+
+  // Ajoute cette méthode dans ChildrenController
+  void updateChildExtras(String childId, Map<String, String> newExtras) {
+    final index = children.indexWhere((c) => c.id == childId);
+    if (index == -1) return;
+
+    final updated = children[index].copyWith(extras: newExtras);
+    children[index] = updated;
+    children.refresh(); // ✅ Force le Obx à se reconstruire
+  }
 }

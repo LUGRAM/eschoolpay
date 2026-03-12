@@ -159,7 +159,12 @@ class ChildModel {
 
   // Ces getters garantissent un String non-nul pour tes widgets
   String get displaySchool => schoolName ?? "Non renseignée";
-  String get displayGrade => grade ?? "Niveau non renseignée";
+  //String get displayGrade => grade ?? "Niveau non renseignée";
+  String get displayGrade {
+    final g = grade;
+    if (g == null || g.isEmpty) return "";
+    return g;
+  }
 
 }
 
