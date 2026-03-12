@@ -1,3 +1,4 @@
+import 'package:eschoolpay/features/fees/pages/payment_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/router/routes.dart';
@@ -22,6 +23,8 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
   final regCtrl = Get.find<RegistrationController>();
   final childrenCtrl = Get.find<ChildrenController>();
   final schoolsCtrl = Get.find<SchoolsController>();
+
+  DateTime selectedDate = DateTime.now();
 
   String? selectedLevel;
   String? selectedSchoolName;
@@ -62,8 +65,8 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
         return _buildSelection(key: const ValueKey(0));
       case 1:
         return _buildSummarySafe(key: const ValueKey(1));
-      case 2:
-        return _buildPaymentSafe(key: const ValueKey(2));
+      // case 2:
+      // return _buildPaymentSafe(key: const ValueKey(2));
       default:
         return const SizedBox.shrink();
     }
@@ -73,7 +76,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
   // STEPPER
   // ─────────────────────────────────────────────────────────────
   Widget _buildPinterestStepper() {
-    List<String> labels = ["Sélection", "Résumé", "Paiement"];
+    List<String> labels = ["Sélection", "Résumé"];
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(labels.length, (index) {
@@ -184,7 +187,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
 
         const SizedBox(height: 12),
 
-        // 🚨 Alerte enfant déjà inscrit
+        // Alerte enfant déjà inscrit
         Obx(() {
           final child = regCtrl.selectedChild.value;
           if (child != null && child.isAlreadyRegisteredThisYear) {
@@ -220,7 +223,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
 
         const SizedBox(height: 20),
 
-        // ── 2️⃣ ÉTABLISSEMENT ───────────────────────────────────
+        // ── ÉTABLISSEMENT ───────────────────────────────────
         const Text("Établissement",
             style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
@@ -248,8 +251,8 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
 
         const SizedBox(height: 20),
 
-        // ── 3️⃣ CLASSE / NIVEAU (conditionnel) ──────────────────
-        const Text("Classe", style: TextStyle(fontWeight: FontWeight.bold)),
+        // ──CLASSE / NIVEAU (conditionnel) ──────────────────
+        const Text("Niveau", style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
 
         Obx(() {
@@ -284,13 +287,57 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
                 child: Text(level.name),
               );
             }).toList(),
-            onChanged: (level) {
-              if (level != null) schoolsCtrl.selectLevel(level);
+            onChanged: (level) async {
+              if (level != null) {
+                schoolsCtrl.selectLevel(level);
+                await schoolsCtrl.loadInscriptionFee();
+              }
             },
           );
         }),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
+
+        // ── DATE D'INSCRIPTION ─────────────────────────
+        const Text("Date d'inscription",
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+
+        InkWell(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: selectedDate,
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2100),
+            );
+
+            if (picked != null) {
+              setState(() {
+                selectedDate = picked;
+              });
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade400),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const Icon(Icons.calendar_today, size: 18),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 20),
 
         // ── 4️⃣ CARTE FRAIS D'INSCRIPTION ───────────────────────
         // 🔧 UI restaurée — logique à brancher (selectedFee / totalAmount)
@@ -305,23 +352,27 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
               width: 2,
             ),
           ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Frais d'inscription",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              Text(
-                "— FCFA",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
+          child: Obx(() {
+            final fee = schoolsCtrl.inscriptionFee.value;
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Frais d'inscription",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
-              ),
-            ],
-          ),
+                Text(
+                  fee == 0 ? "— FCFA" : "${fee.toStringAsFixed(0)} FCFA",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: fee == 0 ? Colors.grey : Colors.black,
+                  ),
+                ),
+              ],
+            );
+          }),
         ),
 
         const SizedBox(height: 30),
@@ -343,14 +394,15 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
   Widget _buildSummarySafe({Key? key}) {
     final child = regCtrl.selectedChild.value;
     final school = schoolsCtrl.selectedSchool.value;
-    final classe = schoolsCtrl.selectedLevel.value;
+    final level = schoolsCtrl.selectedLevel.value;
+    final amount = schoolsCtrl.inscriptionFee.value.toInt();
 
-    if (child == null || school == null || classe == null) {
+    if (child == null || school == null || level == null) {
       return const Center(
         child: Padding(
-          padding: EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(24),
           child: Text(
-            "Veuillez compléter l'étape précédente.",
+            "Informations incomplètes.",
             style: TextStyle(color: Colors.grey, fontSize: 16),
           ),
         ),
@@ -359,26 +411,99 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
 
     return Column(
       key: key,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _row("Enfant", child.fullName),
-        _row("Établissement", school.name),
-        _row("Classe", classe.name),
+
+        const Text(
+          "Résumé de l'inscription",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Column(
+            children: [
+
+              _row("Enfant", child.fullName),
+              _row("Établissement", school.name),
+              _row("Niveau", level.name),
+
+              _row(
+                "Date d'inscription",
+                "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+              ),
+
+              const Divider(height: 30),
+
+              _row(
+                "Montant payé",
+                "$amount FCFA",
+                bold: true,
+              ),
+            ],
+          ),
+        ),
+
         const SizedBox(height: 30),
+
         Row(
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () => setState(() => step = 0),
-                child: const Text("Modifier"),
+                onPressed: () => setState(() => step = 1),
+                child: const Text("Modifier paiement"),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: GradientButton(
-                label: "Confirmer",
-                onTap: () => setState(() => step = 2),
+                label: "Procéder au paiement",
+                onTap: () {
+
+                  final amount =
+                  schoolsCtrl.inscriptionFee.value.toInt();
+
+                  Get.to(
+                        () => const PaymentPage(),
+                    arguments: {
+                      "amount": amount,
+                      "context": "inscription",
+                    },
+                  );
+                },
               ),
-            ),
+            )
+            // Expanded(
+            //   child: GradientButton(
+            //     label: regCtrl.isLoading.value
+            //         ? "Validation..."
+            //         : "Confirmer l'inscription",
+            //     onTap: regCtrl.isLoading.value
+            //         ? null
+            //         : () async {
+            //
+            //       await regCtrl.confirmRegistration();
+            //
+            //       Get.snackbar(
+            //         "Succès",
+            //         "Inscription enregistrée",
+            //         snackPosition: SnackPosition.BOTTOM,
+            //       );
+            //
+            //       Get.offNamed(Routes.home);
+            //     },
+            //   ),
+            // ),
           ],
         ),
       ],
@@ -390,27 +515,36 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
   // ─────────────────────────────────────────────────────────────
   Widget _buildPaymentSafe({Key? key}) {
     return Column(
-      key: key,
       children: [
-        const SizedBox(height: 30),
-        Obx(() => GradientButton(
-          label: regCtrl.isLoading.value
-              ? "Inscription..."
-              : "Confirmer l'inscription",
-          onTap: regCtrl.isLoading.value
-              ? null
-              : () async {
-            await regCtrl.confirmRegistration();
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => setState(() => step = 1),
+                child: const Text("Modifier"),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: GradientButton(
+                label: "Procéder au paiement",
+                onTap: () {
 
-            Get.snackbar(
-              "Succès",
-              "Inscription enregistrée",
-              snackPosition: SnackPosition.BOTTOM,
-            );
+                  final amount =
+                  schoolsCtrl.inscriptionFee.value.toInt();
 
-            Get.offNamed(Routes.home);
-          },
-        )),
+                  Get.to(
+                        () => const PaymentPage(),
+                    arguments: {
+                      "amount": amount,
+                      "context": "inscription",
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        )
       ],
     );
   }

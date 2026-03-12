@@ -1,3 +1,4 @@
+import 'package:eschoolpay/app/binding/auth_binding.dart';
 import 'package:get/get.dart';
 
 // Importations des Pages et Controllers
@@ -20,8 +21,9 @@ import '../../features/children/pages/add_child_page.dart';
 import '../../features/fees/pages/registration_start_page.dart';
 import '../../features/fees/pages/monthly_fees_star_page.dart';
 import '../../features/fees/pages/fees_success_page.dart';
-
 import '../../features/onboarding/controllers/onboarding_controller.dart';
+import '../../features/history/pages/payment_detail_page.dart';
+
 
 // 1. DÉFINITION DES NOMS DE ROUTES
 import 'package:eschoolpay/app/router/routes.dart';
@@ -60,6 +62,7 @@ class AppPages {
       name: Routes.home,
       page: () => const ESchoolHomePage(),
       bindings: [
+        AuthBinding(),
         ChildrenBinding(),
         FeesBinding(),
         ProfileBinding()
@@ -73,7 +76,9 @@ class AppPages {
     GetPage(
       name: Routes.servicesMenu,
       page: () => const ServicesMenuPage(),
-      binding: FeesBinding(),
+      bindings: [
+        ChildrenBinding(),
+        FeesBinding()]
     ),
     GetPage(
       name: Routes.feesStart,
@@ -109,7 +114,10 @@ class AppPages {
       page: () => const PaymentPage(),
       binding: FeesBinding(),
     ),
-
+    GetPage(
+      name: Routes.paymentDetail,
+      page: () => const PaymentDetailPage(),
+    ),
 
     /*
     GetPage(

@@ -22,4 +22,5 @@ abstract class Routes {
   static const childPaymentHistory  = '/fees/history';
   static const editSheet = '/editq';
   static const faq = '/faq';
+  static const paymentDetail = '/payment-detail';
 }

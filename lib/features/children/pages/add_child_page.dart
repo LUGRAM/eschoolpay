@@ -114,7 +114,7 @@ class _AddChildPageState extends State<AddChildPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text("Ajouter un enfant", style: TextStyle(fontWeight: FontWeight.w700)),
+        title: const Text("Ajouter un enfant", style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

@@ -23,6 +23,7 @@ class ChildrenController extends GetxController {
   void onInit() {
     super.onInit();
 
+    print(isLoggedIn);
     //  Ne charge les enfants QUE si connecté
     if (isLoggedIn) {
       fetchChildren();
@@ -117,5 +118,15 @@ class ChildrenController extends GetxController {
     } catch (_) {
       return null;
     }
+  }
+
+  // Ajoute cette méthode dans ChildrenController
+  void updateChildExtras(String childId, Map<String, String> newExtras) {
+    final index = children.indexWhere((c) => c.id == childId);
+    if (index == -1) return;
+
+    final updated = children[index].copyWith(extras: newExtras);
+    children[index] = updated;
+    children.refresh(); // ✅ Force le Obx à se reconstruire
   }
 }

@@ -21,138 +21,152 @@ class MonthlyFeesStartPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // ─────────────────────────────────────────────
-            // CONTENU SCROLLABLE
-            // ─────────────────────────────────────────────
+
+            /// CONTENU
             Expanded(
-              child: SingleChildScrollView(
+              child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1️⃣ ENFANT
-                    const Text(
-                      "Enfant",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
+                child: Obx(() {
 
-                    Obx(() {
-                      final eligibleChildren = childrenCtrl.children
-                          .where((c) =>
-                      c.schoolId != null && c.grade != null)
-                          .toList();
+                  final children = childrenCtrl.children;
 
-                      if (eligibleChildren.isEmpty) {
-                        return const Text(
-                          "Aucun enfant éligible.",
-                          style: TextStyle(color: Colors.grey),
-                        );
-                      }
+                  if (children.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        "Aucun enfant trouvé.",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    );
+                  }
 
-                      return DropdownButtonFormField<ChildModel>(
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  final eligibleChildren = children
+                      .where((c) =>
+                  c.schoolId != null && c.grade != null)
+                      .toList();
+
+                  return SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        /// ENFANT
+                        const Text(
+                          "Enfant",
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        initialValue: feesCtrl.selectedChild.value,
-                        items: eligibleChildren
-                            .map((c) => DropdownMenuItem(
-                          value: c,
-                          child: Text(
-                              "${c.fullName} (${c.displayGrade})"),
-                        ))
-                            .toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            feesCtrl.selectChild(val);
+
+                        const SizedBox(height: 8),
+
+                        DropdownButtonFormField<ChildModel>(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          value: feesCtrl.selectedChild.value,
+                          items: eligibleChildren
+                              .map((child) => DropdownMenuItem(
+                            value: child,
+                            child: Text(
+                              child.displayGrade.isNotEmpty
+                                  ? "${child.fullName} (${child.displayGrade})"
+                                  : child.fullName,
+                            ),
+                          ))
+                              .toList(),
+                          onChanged: (child) {
+                            if (child != null) {
+                              feesCtrl.selectChild(child);
+                            }
+                          },
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        /// TRANCHES
+                        const Text(
+                          "Tranche",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Obx(() {
+                          final options =
+                              feesCtrl.availableMonthlyOptions;
+
+                          if (feesCtrl.selectedChild.value == null) {
+                            return const Text(
+                              "Veuillez sélectionner un enfant.",
+                              style: TextStyle(color: Colors.grey),
+                            );
                           }
-                        },
-                      );
-                    }),
 
-                    const SizedBox(height: 24),
+                          if (options.isEmpty) {
+                            return const Text(
+                              "Aucune tranche disponible.",
+                              style: TextStyle(color: Colors.grey),
+                            );
+                          }
 
-                    // 2️⃣ TRANCHES
-                    const Text(
-                      "Tranche",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
+                          return Column(
+                            children: options.map((opt) {
+                              final selected =
+                                  feesCtrl.selectedMonthlyOption.value == opt;
 
-                    Obx(() {
-                      final options = feesCtrl.availableMonthlyOptions;
-
-                      if (feesCtrl.selectedChild.value == null) {
-                        return const Text(
-                          "Veuillez d'abord sélectionner un enfant.",
-                          style: TextStyle(color: Colors.grey),
-                        );
-                      }
-
-                      if (options.isEmpty) {
-                        return const Text(
-                          "Aucune tranche disponible.",
-                          style: TextStyle(color: Colors.grey),
-                        );
-                      }
-
-                      return Column(
-                        children: options.map((opt) {
-                          final selected =
-                              feesCtrl.selectedMonthlyOption.value == opt;
-
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: selected
-                                  ? AppColors.primarySoft.withValues(alpha:0.1)
-                                  : Colors.grey.withValues(alpha:0.05),
-                              border: Border.all(
-                                color: selected
-                                    ? AppColors.primarySoft
-                                    : Colors.grey.withValues(alpha:0.3),
-                                width: 2,
-                              ),
-                            ),
-                            child: ListTile(
-                              leading: Radio(
-                                value: opt,
-                                groupValue:
-                                feesCtrl.selectedMonthlyOption.value,
-                                onChanged: (_) =>
-                                feesCtrl.selectedMonthlyOption.value = opt,
-                              ),
-                              title: Text("${opt.months} mois"),
-                              subtitle: opt.discountPercent != null
-                                  ? Text("-${opt.discountPercent}%")
-                                  : opt.discountFixed != null
-                                  ? Text(
-                                "-${opt.discountFixed} FCFA",
-                              )
-                                  : null,
-                              trailing:
-                              Text("${opt.finalAmount} FCFA"),
-                            ),
+                              return Container(
+                                margin:
+                                const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                  BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: selected
+                                        ? AppColors.primarySoft
+                                        : Colors.grey,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: ListTile(
+                                  leading: Radio(
+                                    value: opt,
+                                    groupValue: feesCtrl
+                                        .selectedMonthlyOption.value,
+                                    onChanged: (_) {
+                                      feesCtrl.selectedMonthlyOption
+                                          .value = opt;
+                                    },
+                                  ),
+                                  title: Text("${opt.months} mois"),
+                                  subtitle: opt.discountPercent != null
+                                      ? Text(
+                                      "-${opt.discountPercent}%")
+                                      : opt.discountFixed != null
+                                      ? Text(
+                                      "-${opt.discountFixed} FCFA")
+                                      : null,
+                                  trailing:
+                                  Text("${opt.finalAmount} FCFA"),
+                                ),
+                              );
+                            }).toList(),
                           );
-                        }).toList(),
-                      );
-                    }),
-                  ],
-                ),
+                        }),
+                      ],
+                    ),
+                  );
+                }),
               ),
             ),
 
-            // ─────────────────────────────────────────────
-            // FOOTER FIXE
-            // ─────────────────────────────────────────────
+            /// FOOTER
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              padding:
+              const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: Obx(() {
                 final opt = feesCtrl.selectedMonthlyOption.value;
                 final amount = opt?.finalAmount ?? 0;
-                feesCtrl.currentService.value = ServiceType.mensualite;
+
+                feesCtrl.currentService.value =
+                    ServiceType.mensualite;
 
                 return GradientButton(
                   label: "Payer $amount FCFA",

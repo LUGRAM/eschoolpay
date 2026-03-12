@@ -20,7 +20,7 @@ class OnboardingController extends GetxController {
 
   void skip() {
     // Utilise ta route de login/signup
-    Get.offAllNamed(Routes.phoneSignup);
+    Get.offAllNamed(Routes.phoneSignin);
   }
 
   @override
