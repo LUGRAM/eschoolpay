@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../app/theme/app_colors.dart';
@@ -90,9 +91,10 @@ class TransportStartPage extends StatelessWidget {
                           ),
                         )
                             .toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            feesCtrl.selectChild(val);
+                        onChanged: (val) async {
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          if (val?.id != null) {
+                            feesCtrl.selectChild(val!, prefs.getString('selected_year_id'));
                           }
                         },
                       );

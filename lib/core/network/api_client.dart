@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:get_storage/get_storage.dart';
 
+import '../../features/fees/models/frais_scolaire_model.dart';
+
 class ApiClient {
   static const String baseUrl =
       "https://eschool.itmaster-africa.com/api";
@@ -60,6 +62,39 @@ class ApiClient {
     );
 
     return response;
+  }
+
+  static Future<List<FraisScolaireModel>> getFraisScolaire({
+    required String childId,
+    required String yearId,
+  }) async {
+
+    final uri = Uri.parse("$baseUrl/frais-scolaires").replace(
+      queryParameters: {
+        "child_id": childId,
+        "annee_scolaire_id": yearId,
+      },
+    );
+
+    final response = await http.get(
+      uri,
+      headers: {
+        "Accept": "application/json",
+        if (_token != null) "Authorization": "Bearer $_token",
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Erreur chargement frais scolaires");
+    }
+
+    final Map<String, dynamic> body = jsonDecode(response.body);
+
+    final List data = body["data"]; // 🔥 la clé importante
+
+    return data
+        .map((e) => FraisScolaireModel.fromJson(e))
+        .toList();
   }
 
   static Future<http.Response> get(String endpoint) async {

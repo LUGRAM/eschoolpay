@@ -74,15 +74,18 @@ class _PhoneSigninPageState extends State<PhoneSigninPage> {
             ),
             const SizedBox(height: 12),
 
-            AppTextField(
-              hint: "07x xx xx xx",
-              prefixIcon: const Icon(Icons.phone),
-              keyboardType: TextInputType.phone,
-              controller: _phoneCtrl,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LibellePhoneFormatter(),
-              ],
+            Focus(
+              onKeyEvent: (node, event) => KeyEventResult.ignored,
+              child: AppTextField(
+                hint: "07x xx xx xx",
+                prefixIcon: const Icon(Icons.phone),
+                keyboardType: TextInputType.number,
+                controller: _phoneCtrl,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LibellePhoneFormatter(),
+                ],
+              ),
             ),
 
             if (_errorMessage != null) ...[

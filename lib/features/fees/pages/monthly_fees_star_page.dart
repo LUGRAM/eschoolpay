@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../app/theme/app_colors.dart';
@@ -72,9 +73,13 @@ class MonthlyFeesStartPage extends StatelessWidget {
                             ),
                           ))
                               .toList(),
-                          onChanged: (child) {
-                            if (child != null) {
-                              feesCtrl.selectChild(child);
+                          onChanged: (child) async {
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            if (child?.id != null) {
+                              print(child?.id);
+                              print(child?.matricule);
+                              print(prefs.get('selected_year_id'));
+                              feesCtrl.selectChild(child!, prefs.get('selected_year_id').toString());
                             }
                           },
                         ),
@@ -90,8 +95,8 @@ class MonthlyFeesStartPage extends StatelessWidget {
                         const SizedBox(height: 12),
 
                         Obx(() {
-                          final options =
-                              feesCtrl.availableMonthlyOptions;
+
+                          final options = feesCtrl.fraisScolaires;
 
                           if (feesCtrl.selectedChild.value == null) {
                             return const Text(
@@ -109,15 +114,14 @@ class MonthlyFeesStartPage extends StatelessWidget {
 
                           return Column(
                             children: options.map((opt) {
+
                               final selected =
-                                  feesCtrl.selectedMonthlyOption.value == opt;
+                                  feesCtrl.selectedFraisScolaire.value?.id == opt.id;
 
                               return Container(
-                                margin:
-                                const EdgeInsets.only(bottom: 12),
+                                margin: const EdgeInsets.only(bottom: 12),
                                 decoration: BoxDecoration(
-                                  borderRadius:
-                                  BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: selected
                                         ? AppColors.primarySoft
@@ -126,25 +130,27 @@ class MonthlyFeesStartPage extends StatelessWidget {
                                   ),
                                 ),
                                 child: ListTile(
+
                                   leading: Radio(
                                     value: opt,
-                                    groupValue: feesCtrl
-                                        .selectedMonthlyOption.value,
+                                    groupValue: feesCtrl.selectedFraisScolaire.value,
                                     onChanged: (_) {
-                                      feesCtrl.selectedMonthlyOption
-                                          .value = opt;
+                                      feesCtrl.selectedFraisScolaire.value = opt;
                                     },
                                   ),
-                                  title: Text("${opt.months} mois"),
-                                  subtitle: opt.discountPercent != null
-                                      ? Text(
-                                      "-${opt.discountPercent}%")
-                                      : opt.discountFixed != null
-                                      ? Text(
-                                      "-${opt.discountFixed} FCFA")
+
+                                  // libelle API
+                                  title: Text(opt.libelle),
+
+                                  // réduction
+                                  subtitle: opt.pourcentageReduction! > 0
+                                      ? Text("-${opt.pourcentageReduction}%")
+                                      : opt.montantReduction! > 0
+                                      ? Text("-${opt.montantReduction} FCFA")
                                       : null,
-                                  trailing:
-                                  Text("${opt.finalAmount} FCFA"),
+
+                                  // montant
+                                  trailing: Text("${opt.montant} FCFA"),
                                 ),
                               );
                             }).toList(),
@@ -159,19 +165,24 @@ class MonthlyFeesStartPage extends StatelessWidget {
 
             /// FOOTER
             Padding(
-              padding:
-              const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: Obx(() {
-                final opt = feesCtrl.selectedMonthlyOption.value;
-                final amount = opt?.finalAmount ?? 0;
 
-                feesCtrl.currentService.value =
-                    ServiceType.mensualite;
+                final opt = feesCtrl.selectedFraisScolaire.value;
+                final amount = opt?.montant ?? 0;
+
+                feesCtrl.currentService.value = ServiceType.mensualite;
 
                 return GradientButton(
                   label: "Payer $amount FCFA",
                   onTap: opt != null
-                      ? () => Get.toNamed(Routes.payment)
+                      ? () => Get.toNamed(
+                    Routes.payment,
+                    arguments: {
+                      "amount": amount,
+                      "label": opt.libelle,
+                    },
+                  )
                       : null,
                 );
               }),

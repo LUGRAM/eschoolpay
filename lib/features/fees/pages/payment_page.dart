@@ -271,6 +271,21 @@ class _PaymentPageState extends State<PaymentPage> {
       await _handleFeesPayment();
     }
   }
+  Future<void> _handleFeesPayment() async {
+    final feesCtrl = Get.find<FeesController>();
+    final record = await feesCtrl.payNow(method: method);
+
+    setState(() => loading = false);
+
+    Get.offNamed(Routes.feesSuccess, arguments: {
+      'status': record.status,
+      'childName': record.childName,
+      'feeLabel': record.feeLabel,
+      'amount': record.amount,
+      'method': record.method,
+      'date': record.createdAt,
+    });
+  }
   Future<void> _handleInscriptionPayment() async {
     final regCtrl = Get.find<RegistrationController>();
 
@@ -286,21 +301,6 @@ class _PaymentPageState extends State<PaymentPage> {
         'method': method,
       },
     );
-  }
-  Future<void> _handleFeesPayment() async {
-    final feesCtrl = Get.find<FeesController>();
-    final record = await feesCtrl.payNow(method: method);
-
-    setState(() => loading = false);
-
-    Get.offNamed(Routes.feesSuccess, arguments: {
-      'status': record.status,
-      'childName': record.childName,
-      'feeLabel': record.feeLabel,
-      'amount': record.amount,
-      'method': record.method,
-      'date': record.createdAt,
-    });
   }
 
   // ─────────────────────────────────────────────────────

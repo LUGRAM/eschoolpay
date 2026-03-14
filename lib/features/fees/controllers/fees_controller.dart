@@ -1,7 +1,9 @@
+import 'package:eschoolpay/core/network/api_client.dart';
 import 'package:get/get.dart';
 import '../../children/models/child_model.dart';
 import '../data/mock_transport_options.dart';
 import '../models/cantine_option_model.dart';
+import '../models/frais_scolaire_model.dart';
 import '../models/monthly_fee_config_model.dart';
 import '../data/mock_monthly_fees_options.dart';
 import '../data/mock_cantine_options.dart';
@@ -17,7 +19,7 @@ class FeesController extends GetxController {
   // SÉLECTIONS
   // ─────────────────────────────────────────────────────
   final selectedChild = Rxn<ChildModel>();
-  final selectedMonthlyOption = Rxn<MonthlyFeeOption>();
+  final selectedFraisScolaire = Rxn<FraisScolaireModel>();
   final selectedCantineOption = Rxn<CantineOption>();
   final selectedTransportOption = Rxn<TransportOption>();
   final paymentMethod = 'Mobile Money'.obs;
@@ -37,7 +39,7 @@ class FeesController extends GetxController {
   Rxn<dynamic> get selected {
     switch (currentService.value) {
       case ServiceType.mensualite:
-        return selectedMonthlyOption;
+        return selectedFraisScolaire;
       case ServiceType.cantine:
         return selectedCantineOption;
       case ServiceType.transport:
@@ -50,20 +52,20 @@ class FeesController extends GetxController {
   // ─────────────────────────────────────────────────────
   // OPTIONS DISPONIBLES
   // ─────────────────────────────────────────────────────
-  List<MonthlyFeeOption> get availableMonthlyOptions {
-    final child = selectedChild.value;
-    if (child == null) return [];
-
-    final schoolId = child.extras["school_id"];
-    final grade = child.extras["grade"];
-
-    if (schoolId == null || grade == null) return [];
-
-    return mockMonthlyFees
-        .where((c) => c.schoolId == schoolId && c.level == grade)
-        .expand((c) => c.options)
-        .toList();
-  }
+  // List<MonthlyFeeOption> get availableMonthlyOptions {
+  //   final child = selectedChild.value;
+  //   if (child == null) return [];
+  //
+  //   final schoolId = child.extras["school_id"];
+  //   final grade = child.extras["grade"];
+  //
+  //   if (schoolId == null || grade == null) return [];
+  //
+  //   return mockMonthlyFees
+  //       .where((c) => c.schoolId == schoolId && c.level == grade)
+  //       .expand((c) => c.options)
+  //       .toList();
+  // }
 
   List<CantineOption> get availableCantineOptions {
     final child = selectedChild.value;
@@ -91,7 +93,7 @@ class FeesController extends GetxController {
   int get totalAmount {
     switch (currentService.value) {
       case ServiceType.mensualite:
-        return selectedMonthlyOption.value?.finalAmount ?? 0;
+        return selectedFraisScolaire.value?.montant.toInt() ?? 0;
       case ServiceType.cantine:
         return selectedCantineOption.value?.amount ?? 0;
       case ServiceType.transport:
@@ -104,11 +106,51 @@ class FeesController extends GetxController {
   // ─────────────────────────────────────────────────────
   // ACTIONS
   // ─────────────────────────────────────────────────────
-  void selectChild(ChildModel child) {
+  // void selectChild(ChildModel child) {
+  //   selectedChild.value = child;
+  //   selectedMonthlyOption.value = null;
+  //   selectedCantineOption.value = null;
+  //   selectedTransportOption.value = null;
+  // }
+
+  RxnString selectedSchoolYearId = RxnString();
+  RxList<FraisScolaireModel> fraisScolaires = <FraisScolaireModel>[].obs;
+
+  RxBool isLoadingFrais = false.obs;
+
+  void selectChild(ChildModel child, String? schoolYearId) async {
     selectedChild.value = child;
-    selectedMonthlyOption.value = null;
+
+    // stocker l'année scolaire si besoin
+    selectedSchoolYearId.value = schoolYearId;
+
+    selectedFraisScolaire.value = null;
     selectedCantineOption.value = null;
     selectedTransportOption.value = null;
+
+    await loadFraisScolaire(child.id!, schoolYearId!);
+  }
+
+  Future<void> loadFraisScolaire(String childId, String yearId) async {
+
+    try {
+
+      isLoadingFrais.value = true;
+
+      final result = await ApiClient.getFraisScolaire(
+        childId: childId,
+        yearId: yearId,
+      );
+
+      fraisScolaires.value = result;
+
+      print(fraisScolaires);
+
+    } catch (e) {
+      print("Erreur chargement frais scolaires: $e");
+    } finally {
+      isLoadingFrais.value = false;
+    }
   }
 
   // ─────────────────────────────────────────────────────
@@ -129,7 +171,7 @@ class FeesController extends GetxController {
     String label;
     switch (currentService.value) {
       case ServiceType.mensualite:
-        label = "Mensualité • ${selectedMonthlyOption.value?.months ?? 0} mois";
+        label = selectedFraisScolaire.value?.libelle ?? "Mensualité";
         break;
       case ServiceType.cantine:
         label = "Cantine • ${selectedCantineOption.value?.label ?? ''}";
@@ -159,7 +201,7 @@ class FeesController extends GetxController {
 
   void reset() {
     selectedChild.value = null;
-    selectedMonthlyOption.value = null;
+    selectedFraisScolaire.value = null;
     selectedCantineOption.value = null;
     selectedTransportOption.value = null;
     currentService.value = ServiceType.inscription;
