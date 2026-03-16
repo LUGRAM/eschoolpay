@@ -3,34 +3,87 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../app/controllers/annee_scolaire_controller.dart';
 import '../../../core/network/api_client.dart';
-import '../../children/controllers/children_controller.dart';
 import '../models/payment_history_model.dart';
 
 class PaymentHistoryController extends GetxController {
+  // ── Liste complète → HistoryPage ─────────────────────────────
   final histories = <PaymentHistory>[].obs;
   final isLoading = false.obs;
+
+  // ── 5 derniers → HomeContent ─────────────────────────────────
+  final recentHistories = <PaymentHistory>[].obs;
+  final isLoadingRecent = false.obs;
 
   @override
   void onInit() {
     super.onInit();
+    fetchDashboard();
     fetchAll();
   }
 
-  // ─── Point d'entrée principal ────────────────────────────────
+  // ─── Récupère l'annee_scolaire_id courant ────────────────────
+  int get _anneeId {
+    try {
+      return Get.find<AnneeScolaireController>().selectedYear.value?.id ?? 1;
+    } catch (_) {
+      return 1;
+    }
+  }
+
+  // ─── Parse le body commun aux deux endpoints ─────────────────
+  List<PaymentHistory> _parseBody(Map<String, dynamic> body) {
+    final List inscriptions = body['inscriptions'] ?? [];
+    final List transactions = body['dernieres_transactions'] ?? [];
+
+    final all = <PaymentHistory>[
+      ...inscriptions.map((j) => PaymentHistory.fromInscriptionApi(j)),
+      ...transactions.map((j) => PaymentHistory.fromTransactionApi(j)),
+    ];
+
+    all.sort((a, b) => b.date.compareTo(a.date));
+    return all;
+  }
+
+  // ─── GET /api/parent/dashboard → HomeContent ────────────────
+  Future<void> fetchDashboard() async {
+    try {
+      isLoadingRecent.value = true;
+      final response = await ApiClient.get(
+        '/parent/dashboard?annee_scolaire_id=$_anneeId',
+      );
+
+      debugPrint('🏠 dashboard status: ${response.statusCode}');
+
+      if (response.statusCode != 200) return;
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final all = _parseBody(body);
+      recentHistories.assignAll(all.take(5).toList());
+    } catch (e) {
+      debugPrint('❌ fetchDashboard: $e');
+    } finally {
+      isLoadingRecent.value = false;
+    }
+  }
+
+  // ─── GET /api/parent/historique → HistoryPage ───────────────
   Future<void> fetchAll() async {
     try {
       isLoading.value = true;
-      histories.clear();
+      final response = await ApiClient.get(
+        '/parent/historique?annee_scolaire_id=$_anneeId',
+      );
 
-      final results = await Future.wait([
-        fetchFromInscriptionsApi(),
-        fetchFromFraisScolairesApi(),
-      ]);
+      debugPrint('📋 historique status: ${response.statusCode}');
 
-      final all = [...results[0], ...results[1]];
-      all.sort((a, b) => b.date.compareTo(a.date));
-      histories.assignAll(all);
+      if (response.statusCode != 200) return;
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      histories.assignAll(_parseBody(body));
+
+      debugPrint('✅ historique: ${histories.length} entrées');
     } catch (e) {
       debugPrint('❌ fetchAll: $e');
     } finally {
@@ -38,76 +91,17 @@ class PaymentHistoryController extends GetxController {
     }
   }
 
-  // ─── GET /api/inscriptions ───────────────────────────────────
-  Future<List<PaymentHistory>> fetchFromInscriptionsApi() async {
-    try {
-      final response = await ApiClient.get('/inscriptions');
-      if (response.statusCode != 200) return [];
-      final body = jsonDecode(response.body);
-      final List data = body['data'] ?? [];
-      return data
-          .map((json) => PaymentHistory.fromInscriptionApi(json))
-          .toList();
-    } catch (e) {
-      debugPrint('❌ fetchFromInscriptionsApi: $e');
-      return [];
-    }
-  }
-
-  // ─── GET /api/frais-scolaires par enfant (temporaire) ────────
-  Future<List<PaymentHistory>> fetchFromFraisScolairesApi() async {
-    try {
-      if (!Get.isRegistered<ChildrenController>()) return [];
-      final children = Get.find<ChildrenController>().children;
-      final List<PaymentHistory> result = [];
-
-      for (final child in children) {
-        final schoolId = child.extras['school_id'];
-        final niveauId = child.extras['niveau_id'];
-        if (schoolId == null || niveauId == null) continue;
-
-        // annee_scolaire_id dynamique si disponible
-        int anneeId = 2;
-        try {
-          anneeId = Get.find(tag: 'AnneeScolaireController')
-              .selectedYear
-              ?.value
-              ?.id ?? 2;
-        } catch (_) {}
-
-        final response = await ApiClient.get(
-          '/frais-scolaires?ecole_id=$schoolId&niveau_id=$niveauId&annee_scolaire_id=$anneeId',
-        );
-        if (response.statusCode != 200) continue;
-
-        final body = jsonDecode(response.body);
-        final List data = body['data'] ?? [];
-
-        for (final json in data) {
-          result.add(PaymentHistory.fromFraisScolairesApi(
-            json,
-            childName: child.fullName,
-            childId: child.id ?? '',
-            schoolName: child.extras['school_name'] ?? '',
-            grade: child.extras['grade'] ?? '',
-          ));
-        }
-      }
-
-      return result;
-    } catch (e) {
-      debugPrint('❌ fetchFromFraisScolairesApi: $e');
-      return [];
-    }
-  }
-
-  // ─── Ajout après paiement confirmé ──────────────────────────
+  // ─── Ajout local après paiement confirmé ────────────────────
   void addHistory(PaymentHistory history) {
     histories.insert(0, history);
+    // Met aussi à jour les récents si < 5
+    if (recentHistories.length < 5) {
+      recentHistories.insert(0, history);
+    } else {
+      recentHistories.insert(0, history);
+      if (recentHistories.length > 5) recentHistories.removeLast();
+    }
   }
-
-  // ─── 4 derniers pour la HomePage ─────────────────────────────
-  List<PaymentHistory> get recentPayments => histories.take(4).toList();
 
   // ─── Labels & UI helpers ─────────────────────────────────────
   String serviceLabel(PaymentServiceType type) {

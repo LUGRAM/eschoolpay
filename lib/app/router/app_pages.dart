@@ -9,6 +9,7 @@ import '../../features/fees/pages/cantine_start_page.dart';
 import '../../features/fees/pages/payment_page.dart';
 import '../../features/fees/pages/services_menu_page.dart';
 import '../../features/fees/pages/transport_start_page.dart';
+import '../../features/history/pages/history_page.dart';
 import '../../features/profile/bindings/profile_binding.dart';
 import '../../features/profile/pages/edit_sheet_page.dart';
 import '../../features/schools/bindings/school_binding.dart';
@@ -118,6 +119,11 @@ class AppPages {
       name: Routes.paymentDetail,
       page: () => const PaymentDetailPage(),
     ),
+    GetPage(
+      name: Routes.history,
+      page: () => const HistoryPage(),
+    ),
+
 
     /*
     GetPage(

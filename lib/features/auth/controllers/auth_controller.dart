@@ -92,6 +92,6 @@ class AuthController extends GetxController {
     _storage.remove('user_phone');
 
     _service.logout();
-    Get.offAllNamed(Routes.phoneSignin);
+    Get.offAllNamed(Routes.onboarding);
   }
 }

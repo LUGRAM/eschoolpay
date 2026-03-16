@@ -1,5 +1,6 @@
-import 'dart:async';
+// features/fees/pages/payment_page.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -8,6 +9,8 @@ import '../../../app/router/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/app_text_field.dart';
 import '../../../app/widgets/gradient_button.dart';
+import '../../history/controllers/payment_history_controller.dart';
+import '../../history/models/payment_history_model.dart';
 import '../controllers/fees_controller.dart';
 import '../controllers/registration_controller.dart';
 import '../services/payment_service.dart';
@@ -26,18 +29,19 @@ class _PaymentPageState extends State<PaymentPage> {
   final phoneCtrl = TextEditingController();
   String method = 'Airtel Money';
   bool loading = false;
+  //String _loadingLabel = "Traitement...";
   Timer? _paymentTimer;
-  static const int _maxAttempts = 48;
+  static const int _maxAttempts = 36; // 36 × 5s = 3 minutes
 
   @override
   void dispose() {
+    _paymentTimer?.cancel();
     phoneCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Détection automatique du contexte
     final PaymentContext paymentContext = _detectContext();
     final int amount = _getAmount(paymentContext);
     final String title = paymentContext == PaymentContext.inscription
@@ -60,16 +64,18 @@ class _PaymentPageState extends State<PaymentPage> {
       ),
       body: Form(
         key: _formKey,
-        child: SingleChildScrollView( // ✅ AJOUT DU SCROLL
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
-            mainAxisSize: MainAxisSize.min, // ✅ IMPORTANT pour le scroll
+            mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 20),
 
               // HEADER
               Text(
-                paymentContext == PaymentContext.inscription ? "INSCRIPTION" : "PAIEMENT",
+                paymentContext == PaymentContext.inscription
+                    ? "INSCRIPTION"
+                    : "PAIEMENT",
                 style: const TextStyle(
                   letterSpacing: 2,
                   fontSize: 11,
@@ -82,7 +88,8 @@ class _PaymentPageState extends State<PaymentPage> {
 
               // MONTANT
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 40),
+                padding:
+                const EdgeInsets.symmetric(vertical: 24, horizontal: 40),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50,
                   borderRadius: BorderRadius.circular(24),
@@ -90,10 +97,8 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      "Montant à régler",
-                      style: TextStyle(color: Colors.grey, fontSize: 13),
-                    ),
+                    const Text("Montant à régler",
+                        style: TextStyle(color: Colors.grey, fontSize: 13)),
                     const SizedBox(height: 8),
                     Text(
                       "$amount FCFA",
@@ -112,76 +117,48 @@ class _PaymentPageState extends State<PaymentPage> {
               // MODES DE PAIEMENT
               const Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  "Mode de paiement",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                ),
+                child: Text("Mode de paiement",
+                    style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               ),
               const SizedBox(height: 12),
               _methodTile("Airtel Money", Icons.phone_android),
               const SizedBox(height: 8),
               _methodTile("Moov Money", Icons.phone_iphone),
-              // const SizedBox(height: 8),
-              // _methodTile("Espèces", Icons.money),
 
               const SizedBox(height: 24),
 
-              // TÉLÉPHONE (conditionnel)
-              if (method != 'Espèces') ...[
-                AppTextField(
-                  hint: _getPhoneHint(),
-                  prefixIcon: const Icon(Icons.phone),
-                  keyboardType: TextInputType.phone,
-                  controller: phoneCtrl,
-                  validator: _validatePhone,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LibellePhoneFormatter(),
-                  ],
-                ),
-              ] else ...[
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.orange.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.orange.shade700, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          "Veuillez vous présenter à la comptabilité de l'école pour régler ce montant. "
-                              "Nous validerons votre inscription immédiatement après le paiement.",
-                          style: TextStyle(
-                            color: Colors.orange.shade900,
-                            fontSize: 12,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              // CHAMP TÉLÉPHONE
+              AppTextField(
+                hint: _getPhoneHint(),
+                prefixIcon: const Icon(Icons.phone),
+                keyboardType: TextInputType.phone,
+                controller: phoneCtrl,
+                validator: _validatePhone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LibellePhoneFormatter(),
+                ],
+              ),
 
               const SizedBox(height: 24),
 
-              // BOUTON PAYER (maintenant dans le scroll)
+              // ── INFO ATTENTE paiement mobile ─────────────────
+
+              // BOUTON PAYER
               SizedBox(
                 width: double.infinity,
                 child: GradientButton(
-                  label: loading
-                      ? "Traitement..."
-                      : (method == 'Espèces' ? "Confirmer l'inscription" : "Payer maintenant"),
+                  label: loading ? "En cours..." : "Payer maintenant",
                   loading: loading,
-                  onTap: loading ? null : () => _processPayment(paymentContext),
+                  onTap: loading
+                      ? null
+                      : () => _processPayment(paymentContext),
                 ),
               ),
 
-              SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 20), // ✅ Espace pour le clavier
+              SizedBox(
+                  height: MediaQuery.of(context).viewInsets.bottom + 20),
             ],
           ),
         ),
@@ -189,9 +166,7 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  // ─────────────────────────────────────────────────────
-  // DÉTECTION DU CONTEXTE
-  // ─────────────────────────────────────────────────────
+  // ─── Détection du contexte ───────────────────────────────────
   PaymentContext _detectContext() {
     if (Get.isRegistered<RegistrationController>()) {
       final regCtrl = Get.find<RegistrationController>();
@@ -199,76 +174,47 @@ class _PaymentPageState extends State<PaymentPage> {
         return PaymentContext.inscription;
       }
     }
-
-    if (Get.isRegistered<FeesController>()) {
-      return PaymentContext.fees;
-    }
-
     return PaymentContext.fees;
   }
 
-  // ─────────────────────────────────────────────────────
-  // RÉCUPÉRATION DU MONTANT
-  // ─────────────────────────────────────────────────────
+  // ─── Montant ─────────────────────────────────────────────────
   int _getAmount(PaymentContext context) {
     final args = Get.arguments ?? {};
-
     if (context == PaymentContext.inscription) {
-      return args['amount'] ?? 25000; // valeur temporaire si non fourni
-    } else {
-      final feesCtrl = Get.find<FeesController>();
-      return feesCtrl.totalAmount;
+      return args['amount'] ?? 0;
     }
+    return Get.find<FeesController>().totalAmount;
   }
-  // ─────────────────────────────────────────────────────
-  // VALIDATION DU NUMÉRO DE TÉLÉPHONE
-  // ─────────────────────────────────────────────────────
-  String? _validatePhone(String? value) {
-    if (method == 'Espèces') return null;
 
+  // ─── Validation téléphone ────────────────────────────────────
+  String? _validatePhone(String? value) {
     if (value == null || value.trim().isEmpty) {
       return "Numéro de téléphone requis";
     }
-
-    // On nettoie la valeur pour la validation logique
-    final cleanPhone = value.replaceAll(' ', '');
-
+    final clean = value.replaceAll(' ', '');
     if (method == 'Airtel Money') {
-      if (!cleanPhone.startsWith('07')) return "Doit commencer par 07";
-      if (cleanPhone.length != 9) return "Le numéro doit avoir 9 chiffres";
+      if (!clean.startsWith('07')) return "Doit commencer par 07";
+      if (clean.length != 9) return "Le numéro doit avoir 9 chiffres";
     } else if (method == 'Moov Money') {
-      if (!cleanPhone.startsWith('06')) return "Doit commencer par 06";
-      if (cleanPhone.length != 9) return "Le numéro doit avoir 9 chiffres";
+      if (!clean.startsWith('06')) return "Doit commencer par 06";
+      if (clean.length != 9) return "Le numéro doit avoir 9 chiffres";
     }
-
     return null;
   }
 
-  // ─────────────────────────────────────────────────────
-  // HINT DU CHAMP TÉLÉPHONE
-  // ─────────────────────────────────────────────────────
   String _getPhoneHint() {
-    if (method == 'Airtel Money') {
-      return "07x xx xx xx";
-    } else if (method == 'Moov Money') {
-      return "06x xx xx xx";
-    }
-    return "Numéro de téléphone";
+    return method == 'Airtel Money' ? "07x xx xx xx" : "06x xx xx xx";
   }
 
-  // ─────────────────────────────────────────────────────
-  // TRAITEMENT DU PAIEMENT
-  // ─────────────────────────────────────────────────────
+  // ─── Lancement paiement ──────────────────────────────────────
   Future<void> _processPayment(PaymentContext context) async {
     FocusScope.of(this.context).unfocus();
+    if (!_formKey.currentState!.validate()) return;
 
-    if (method != 'Espèces') {
-      if (!_formKey.currentState!.validate()) return;
-    }
-
-    setState(() => loading = true);
-
-    await Future.delayed(const Duration(seconds: 2));
+    setState(() {
+      loading = true;
+    //  _loadingLabel = "Initialisation du paiement...";
+    });
 
     if (context == PaymentContext.inscription) {
       await _handleInscriptionPayment();
@@ -276,168 +222,208 @@ class _PaymentPageState extends State<PaymentPage> {
       await _handleFeesPayment();
     }
   }
-  Future<void> _handleFeesPayment() async {
 
+  // ─── INSCRIPTION ─────────────────────────────────────────────
+  Future<void> _handleInscriptionPayment() async {
+    final regCtrl = Get.find<RegistrationController>();
+    final child = regCtrl.selectedChild.value;
+    final amount = Get.arguments?['amount'] ?? 0;
+
+    // Récupère school/grade depuis RegistrationController
+    String schoolName = '';
+    String grade = '';
+    try {
+      final sc = Get.find(tag: 'SchoolsController');
+      schoolName = sc.selectedSchool.value?.name ?? '';
+      grade = sc.selectedLevel.value?.name ?? '';
+    } catch (_) {}
+
+    //setState(() => _loadingLabel = "Enregistrement de l'inscription...");
+
+    try {
+      await regCtrl.confirmRegistration();
+    } catch (e) {
+      _stopLoading();
+      Get.snackbar("Erreur", "Impossible d'enregistrer l'inscription.");
+      return;
+    }
+
+    // Ajout à l'historique
+    _addToHistory(PaymentHistory(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      childId: child?.id ?? '',
+      childName: child?.fullName ?? '',
+      service: PaymentServiceType.inscription,
+      amount: amount is int ? amount : (amount as num).toInt(),
+      date: DateTime.now(),
+      method: method,
+      status: PaymentStatus.success,
+      schoolName: schoolName,
+      grade: grade,
+    ));
+
+    _stopLoading();
+
+    Get.offNamed(Routes.feesSuccess, arguments: {
+      'status': 'SUCCESS',
+      'childName': child?.fullName ?? 'N/A',
+      'feeLabel': 'Inscription scolaire',
+      'amount': amount,
+      'method': method,
+      'date': DateTime.now(),
+    });
+  }
+
+  // ─── FRAIS SCOLAIRES ─────────────────────────────────────────
+  Future<void> _handleFeesPayment() async {
     final feesCtrl = Get.find<FeesController>();
     final service = PaymentService();
 
     final child = feesCtrl.selectedChild.value!;
     final frais = feesCtrl.selectedFraisScolaire.value!;
 
-    final data = {
-      "eleve_id": int.parse(child.id.toString()),
-      "annee_scolaire_id": int.parse(feesCtrl.selectedSchoolYearId.value.toString()),
-      "frais_scolaire_id": int.parse(frais.id.toString()),
-      "montant": feesCtrl.totalAmount.toDouble(),
-      "methode": method,
-      "telephone": phoneCtrl.text,
-    };
-
-    print("====== DONNEES ENVOYEES AU SERVEUR ======");
-    print(data);
+    //setState(() => _loadingLabel = "Envoi de la demande de paiement...");
 
     final response = await service.payerFrais(
       eleveId: int.parse(child.id.toString()),
       anneeId: int.parse(feesCtrl.selectedSchoolYearId.value.toString()),
       fraisId: int.parse(frais.id.toString()),
       montant: feesCtrl.totalAmount.toDouble(),
-      methode: method, telephone: phoneCtrl.text,
+      methode: method,
+      telephone: phoneCtrl.text,
     );
 
-    print(response);
+    debugPrint("Réponse initiale paiement: $response");
 
-    setState(() => loading = false);
-
-    if (response['status'] == true && response['statut'] == "PENDING") {
-      
-      _startPaymentCheck(response['reference'], {
-        'status': 'SUCCESS',
-        'childName': child.fullName,
-        'feeLabel': frais.libelle,
-        'amount': feesCtrl.totalAmount,
-        'method': method,
-        'telephone': phoneCtrl.text,
-        'date': DateTime.now(),
-      });
-
-    } else {
-
-      Get.snackbar(
-        "Erreur",
-        "Impossible d'enregistrer le paiement",
-      );
-
+    // Erreur à l'envoi → on arrête immédiatement
+    if (response['status'] != true || response['statut'] != "PENDING") {
+      _stopLoading();
+      _navigateToResult('FAILED', child.fullName, frais.libelle,
+          feesCtrl.totalAmount);
+      return;
     }
-  }
 
-  void _startPaymentCheck(String reference, Map<String, dynamic> paymentData) {
+    // ── Polling jusqu'à confirmation claire ─────────────────
+    //setState(() => _loadingLabel =
+    //"En attente de confirmation sur votre téléphone...");
+
+    final reference = response['reference'].toString();
     int attempts = 0;
 
     _paymentTimer?.cancel();
-    final service = PaymentService();
+    _paymentTimer =
+        Timer.periodic(const Duration(seconds: 5), (timer) async {
+          attempts++;
 
-    _paymentTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
-      attempts++;
+          final result = await service.check(reference);
+          final String? status = result['status']?.toString();
 
-      final Map<String, dynamic> result =
-      await service.check(reference);
+          debugPrint("Check paiement [$attempts/$_maxAttempts]: $status");
 
-      final String? status = result['status']?.toString();
+          if (status == 'PAYED') {
+            timer.cancel();
 
-      print("===========Statut dans startPayment==========");
-      print(status);
+            _addToHistory(PaymentHistory(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              childId: child.id ?? '',
+              childName: child.fullName,
+              service: PaymentServiceType.mensualite,
+              amount: feesCtrl.totalAmount,
+              date: DateTime.now(),
+              method: method,
+              status: PaymentStatus.success,
+              schoolName: child.extras['school_name'] ?? '',
+              grade: child.extras['grade'] ?? '',
+            ));
 
-      if (status == 'PAYED') {
-        timer.cancel();
-        setState(() => loading = false);
+            _stopLoading();
+            _navigateToResult(
+                'SUCCESS', child.fullName, frais.libelle, feesCtrl.totalAmount);
+            return;
+          }
 
-        Get.offNamed(
-          Routes.feesSuccess,
-          arguments: paymentData,
-        );
+          if (status == 'FAILED') {
+            timer.cancel();
+            _stopLoading();
+            _navigateToResult(
+                'FAILED', child.fullName, frais.libelle, feesCtrl.totalAmount);
+            return;
+          }
 
-        return;
-      }
+          // Timeout → on informe sans bloquer
+          if (attempts >= _maxAttempts) {
+            timer.cancel();
+            _stopLoading();
+            Get.snackbar(
+              "Paiement en attente",
+              "La confirmation prend trop de temps. Vérifiez votre téléphone.",
+              snackPosition: SnackPosition.BOTTOM,
+              duration: const Duration(seconds: 6),
+            );
+          }
+        });
+  }
 
-      if (status == 'FAILED') {
-        timer.cancel();
-        setState(() => loading = false);
+  // ─── Helpers ─────────────────────────────────────────────────
+  void _stopLoading() {
+    if (mounted) setState(() => loading = false);
+  }
 
-        Get.snackbar(
-          "Paiement échoué",
-          "La transaction a été refusée ou annulée",
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        return;
-      }
-
-      // Timeout
-      if (attempts >= _maxAttempts) {
-        timer.cancel();
-        setState(() => loading = false);
-
-        Get.snackbar(
-          "Paiement en attente",
-          "La confirmation du paiement prend trop de temps. Veuillez réessayer.",
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+  void _navigateToResult(
+      String status, String childName, String feeLabel, int amount) {
+    Get.offNamed(Routes.feesSuccess, arguments: {
+      'status': status,
+      'childName': childName,
+      'feeLabel': feeLabel,
+      'amount': amount,
+      'method': method,
+      'date': DateTime.now(),
     });
   }
-  Future<void> _handleInscriptionPayment() async {
-    final regCtrl = Get.find<RegistrationController>();
 
-    await regCtrl.confirmRegistration();
-
-    setState(() => loading = false);
-
-    Get.offNamed(
-      Routes.feesSuccess,
-      arguments: {
-        'status': method == 'Espèces' ? 'PENDING' : 'SUCCESS',
-        'service': 'inscription',
-        'method': method,
-      },
-    );
+  void _addToHistory(PaymentHistory record) {
+    if (Get.isRegistered<PaymentHistoryController>()) {
+      Get.find<PaymentHistoryController>().addHistory(record);
+    }
   }
 
-  // ─────────────────────────────────────────────────────
-  // WIDGETS
-  // ─────────────────────────────────────────────────────
+  // ─── Tile mode paiement ──────────────────────────────────────
   Widget _methodTile(String name, IconData icon) {
     final isSelected = method == name;
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          method = name;
-          phoneCtrl.clear(); // Réinitialise le numéro lors du changement
-        });
-      },
+      onTap: () => setState(() {
+        method = name;
+        phoneCtrl.clear();
+      }),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.grey.shade300,
+            color:
+            isSelected ? AppColors.primary : Colors.grey.shade300,
             width: 2,
           ),
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.05) : Colors.white,
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.05)
+              : Colors.white,
         ),
         child: Row(
           children: [
             Icon(
-              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+              isSelected
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_off,
               color: AppColors.primary,
             ),
             const SizedBox(width: 12),
             Icon(icon, color: Colors.grey),
             const SizedBox(width: 12),
-            Text(
-              name,
-              style: TextStyle(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              ),
-            ),
+            Text(name,
+                style: TextStyle(
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.w600)),
           ],
         ),
       ),
@@ -445,23 +431,21 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 }
 
-/// Formateur de téléphone gabonais (9 chiffres avec espaces)
+// ─── Formateur téléphone gabonais ────────────────────────────
 class LibellePhoneFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
-    final text = newValue.text.replaceAll(' ', ''); // On travaille sans les espaces
-    if (text.length > 9) return oldValue; // Limite à 9 chiffres (format Gabon)
+    final text = newValue.text.replaceAll(' ', '');
+    if (text.length > 9) return oldValue;
 
     String formatted = '';
     for (int i = 0; i < text.length; i++) {
       formatted += text[i];
-      // Ajoute un espace après le 3ème, 5ème et 7ème chiffre
       if ((i == 2 || i == 4 || i == 6) && i != text.length - 1) {
         formatted += ' ';
       }
     }
-
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),

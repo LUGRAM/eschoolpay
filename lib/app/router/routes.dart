@@ -23,4 +23,6 @@ abstract class Routes {
   static const editSheet = '/editq';
   static const faq = '/faq';
   static const paymentDetail = '/payment-detail';
+  static const history = '/history';
+  static const profile = '/profile';
 }

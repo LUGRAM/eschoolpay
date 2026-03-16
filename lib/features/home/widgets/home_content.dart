@@ -5,11 +5,11 @@ import 'package:get/get.dart';
 
 import '../../../app/router/routes.dart';
 import '../../history/controllers/payment_history_controller.dart';
-import '../../history/models/payment_history_model.dart';
 import 'build_year_selector.dart';
 
 class HomeContent extends StatelessWidget {
-  const HomeContent({super.key});
+  final VoidCallback? onViewAll;
+  const HomeContent({super.key, this.onViewAll});
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +32,16 @@ class HomeContent extends StatelessWidget {
                     "Derniers paiements",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  GestureDetector(
+                  /*GestureDetector(
                     onTap: () {
                       // Navigue vers l'onglet Historique (index 0)
                       // On remonte au parent via callback si besoin
                     },
-                    child: const Text(
+                    child: TextButton(
+                      onPressed: () {
+                        Get.toNamed(Routes.history);
+                      },
+                      child: const Text(
                       "Voir tout",
                       style: TextStyle(
                         fontSize: 13,
@@ -45,8 +49,20 @@ class HomeContent extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    ),
+                  ),*/
+                TextButton(
+                  onPressed: onViewAll,
+                  child: const Text(
+                    "Voir tout",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF1976D2),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ],
+                ),
+              ],
               ),
               const SizedBox(height: 10),
             ],
@@ -127,7 +143,7 @@ Widget _buildPaymentList() {
   final ctrl = Get.find<PaymentHistoryController>();
 
   return Obx(() {
-    final recent = ctrl.recentPayments;
+    final recent = ctrl.recentHistories;
 
     if (recent.isEmpty) {
       return Padding(

@@ -47,7 +47,9 @@ class _ESchoolHomePageState extends State<ESchoolHomePage> {
     _pages = [
       const HistoryPage(),          // Index 0
       const PaymentTimelinePage(),   // Index 1
-      const HomeContent(),           // Index 2 (Home par défaut)
+      HomeContent(                                           // ← plus de const
+        onViewAll: () => setState(() => _selectedIndex = 0), // ← même action que _buildNavItem index 0
+      ),           // Index 2 (Home par défaut)
       const NotificationsPage(),    // Index 3
       const SettingsPage(),         // Index 4
     ];

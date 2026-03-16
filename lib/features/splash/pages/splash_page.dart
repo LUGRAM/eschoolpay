@@ -12,6 +12,8 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+
+  // pour rediriger toujours vers la page d'onboarding après 3 secondes
   @override
   void initState() {
     super.initState();
@@ -19,6 +21,28 @@ class _SplashPageState extends State<SplashPage> {
     Future.delayed(
         const Duration(seconds: 3), () => Get.offNamed(Routes.onboarding));
   }
+
+  /// pour afficher le splash qu'une seule fois
+  /*
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 3), _redirect);
+  }
+
+  void _redirect() {
+    final box = GetStorage();
+    final token = box.read('auth_token') ?? box.read('token');
+
+    if (token != null && token.toString().isNotEmpty) {
+      // Token présent → directement home
+      Get.offAllNamed(Routes.home);
+    } else {
+      // Pas de token → onboarding
+      Get.offNamed(Routes.onboarding);
+    }
+  }
+*/
 
   @override
   Widget build(BuildContext context) {

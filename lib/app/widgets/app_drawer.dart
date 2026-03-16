@@ -36,20 +36,143 @@ class AppDrawer extends StatelessWidget {
           const Divider(),
 
           _buildMenuItem(Icons.logout, "Déconnexion", () {
-            Get.defaultDialog(
-              title: "Déconnexion",
-              middleText: "Voulez-vous vraiment quitter l'application ?",
-              textConfirm: "Oui",
-              textCancel: "Non",
-              confirmTextColor: Colors.white,
-              buttonColor: Colors.redAccent,
-              onConfirm: () {
-                // Nettoyage : ex. storage.erase()
-                Get.offAllNamed(Routes.authWelcome);
-              },
+            Get.dialog(
+              Dialog(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Icône
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.logout_rounded,
+                          color: Colors.red.shade400,
+                          size: 32,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Titre
+                      const Text(
+                        "Déconnexion",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1A1A2E),
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // Message
+                      Text(
+                        "Voulez-vous vraiment quitter\nl'application ?",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade500,
+                          height: 1.5,
+                        ),
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      // Boutons
+                      Row(
+                        children: [
+                          // Annuler
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => Get.back(),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "Annuler",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.grey.shade700,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 12),
+
+                          // Confirmer
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                Get.back();
+                                // Nettoyage
+                                Get.offAllNamed(Routes.authWelcome);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.red.shade400,
+                                      Colors.red.shade700,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.red.withValues(alpha: 0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                alignment: Alignment.center,
+                                child: const Text(
+                                  "Quitter",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              barrierDismissible: true,
             );
           }, color: Colors.redAccent),
-
+          
           const SizedBox(height: 20),
         ],
       ),
@@ -67,7 +190,7 @@ class AppDrawer extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.05),
+            color: color.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: color, size: 22),
