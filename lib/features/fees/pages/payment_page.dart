@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -8,6 +10,7 @@ import '../../../app/widgets/app_text_field.dart';
 import '../../../app/widgets/gradient_button.dart';
 import '../controllers/fees_controller.dart';
 import '../controllers/registration_controller.dart';
+import '../services/payment_service.dart';
 
 enum PaymentContext { inscription, fees }
 
@@ -23,6 +26,8 @@ class _PaymentPageState extends State<PaymentPage> {
   final phoneCtrl = TextEditingController();
   String method = 'Airtel Money';
   bool loading = false;
+  Timer? _paymentTimer;
+  static const int _maxAttempts = 48;
 
   @override
   void dispose() {
@@ -116,8 +121,8 @@ class _PaymentPageState extends State<PaymentPage> {
               _methodTile("Airtel Money", Icons.phone_android),
               const SizedBox(height: 8),
               _methodTile("Moov Money", Icons.phone_iphone),
-              const SizedBox(height: 8),
-              _methodTile("Espèces", Icons.money),
+              // const SizedBox(height: 8),
+              // _methodTile("Espèces", Icons.money),
 
               const SizedBox(height: 24),
 
@@ -272,18 +277,111 @@ class _PaymentPageState extends State<PaymentPage> {
     }
   }
   Future<void> _handleFeesPayment() async {
+
     final feesCtrl = Get.find<FeesController>();
-    final record = await feesCtrl.payNow(method: method);
+    final service = PaymentService();
+
+    final child = feesCtrl.selectedChild.value!;
+    final frais = feesCtrl.selectedFraisScolaire.value!;
+
+    final data = {
+      "eleve_id": int.parse(child.id.toString()),
+      "annee_scolaire_id": int.parse(feesCtrl.selectedSchoolYearId.value.toString()),
+      "frais_scolaire_id": int.parse(frais.id.toString()),
+      "montant": feesCtrl.totalAmount.toDouble(),
+      "methode": method,
+      "telephone": phoneCtrl.text,
+    };
+
+    print("====== DONNEES ENVOYEES AU SERVEUR ======");
+    print(data);
+
+    final response = await service.payerFrais(
+      eleveId: int.parse(child.id.toString()),
+      anneeId: int.parse(feesCtrl.selectedSchoolYearId.value.toString()),
+      fraisId: int.parse(frais.id.toString()),
+      montant: feesCtrl.totalAmount.toDouble(),
+      methode: method, telephone: phoneCtrl.text,
+    );
+
+    print(response);
 
     setState(() => loading = false);
 
-    Get.offNamed(Routes.feesSuccess, arguments: {
-      'status': record.status,
-      'childName': record.childName,
-      'feeLabel': record.feeLabel,
-      'amount': record.amount,
-      'method': record.method,
-      'date': record.createdAt,
+    if (response['status'] == true && response['statut'] == "PENDING") {
+      
+      _startPaymentCheck(response['reference'], {
+        'status': 'SUCCESS',
+        'childName': child.fullName,
+        'feeLabel': frais.libelle,
+        'amount': feesCtrl.totalAmount,
+        'method': method,
+        'telephone': phoneCtrl.text,
+        'date': DateTime.now(),
+      });
+
+    } else {
+
+      Get.snackbar(
+        "Erreur",
+        "Impossible d'enregistrer le paiement",
+      );
+
+    }
+  }
+
+  void _startPaymentCheck(String reference, Map<String, dynamic> paymentData) {
+    int attempts = 0;
+
+    _paymentTimer?.cancel();
+    final service = PaymentService();
+
+    _paymentTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      attempts++;
+
+      final Map<String, dynamic> result =
+      await service.check(reference);
+
+      final String? status = result['status']?.toString();
+
+      print("===========Statut dans startPayment==========");
+      print(status);
+
+      if (status == 'PAYED') {
+        timer.cancel();
+        setState(() => loading = false);
+
+        Get.offNamed(
+          Routes.feesSuccess,
+          arguments: paymentData,
+        );
+
+        return;
+      }
+
+      if (status == 'FAILED') {
+        timer.cancel();
+        setState(() => loading = false);
+
+        Get.snackbar(
+          "Paiement échoué",
+          "La transaction a été refusée ou annulée",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      // Timeout
+      if (attempts >= _maxAttempts) {
+        timer.cancel();
+        setState(() => loading = false);
+
+        Get.snackbar(
+          "Paiement en attente",
+          "La confirmation du paiement prend trop de temps. Veuillez réessayer.",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
     });
   }
   Future<void> _handleInscriptionPayment() async {
