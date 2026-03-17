@@ -24,6 +24,8 @@ class FeesController extends GetxController {
   final selectedTransportOption = Rxn<FraisScolaireModel>();
   final paymentMethod = 'Mobile Money'.obs;
 
+  final type = RxString("");
+
   // ─────────────────────────────────────────────────────
   // HISTORIQUE DES PAIEMENTS
   // ─────────────────────────────────────────────────────
@@ -124,6 +126,7 @@ class FeesController extends GetxController {
     print(type);
 
     selectedChild.value = child;
+    selectedSchoolYearId.value = schoolYearId.toString();
 
     if (type == "MENSUEL") {
       await loadFraisScolaire(child.id!, schoolYearId.toString());
@@ -135,7 +138,6 @@ class FeesController extends GetxController {
   }
 
   Future<void> loadFraisScolaire(String childId, String yearId) async {
-
     try {
 
       isLoadingFrais.value = true;

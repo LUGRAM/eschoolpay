@@ -13,7 +13,7 @@ class ESchoolPayApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'E-SchoolPay',
+      title: 'Bantu SchoolPay',
       theme: AppTheme.light,
       initialRoute: Routes.splash,
       getPages: AppPages.pages,

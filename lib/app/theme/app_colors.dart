@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const primary = Color(0xFF063d66); // bleu E-SchoolPay
+  static const primary = Color(0xFF063d66); // bleu Bantu SchoolPay
   static const primaryPast = Color(0xFF0E4C68);
 
   static const primarySoft = Color(0xFF063d66);

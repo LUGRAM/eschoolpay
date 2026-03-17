@@ -109,7 +109,7 @@ class TransportStartPage extends StatelessWidget {
                             feesCtrl.selectChild(
                                 val!,
                                 yearId.toString(),               // convertit en string seulement ici
-                                "transport"
+                                "TRANSPORT"
                             );
                           }
                         },

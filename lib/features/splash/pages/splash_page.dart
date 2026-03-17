@@ -88,7 +88,7 @@ class _SplashPageState extends State<SplashPage> {
               const SizedBox(height: 32),
 
               const Text(
-                "E-SchoolPay",
+                "Bantu SchoolPay",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
@@ -180,7 +180,7 @@ class _SplashPageState extends State<SplashPage> {
               ),
               const SizedBox(height: 32),
               const Text(
-                "E-SchoolPay",
+                "Bantu SchoolPay",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
@@ -242,7 +242,7 @@ class _SplashPageState extends State<SplashPage> {
             Icon(Icons.school_rounded, color: Colors.white, size: 52),
             SizedBox(height: 12),
             Text(
-              'E-SchoolPay',
+              'Bantu SchoolPay',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,

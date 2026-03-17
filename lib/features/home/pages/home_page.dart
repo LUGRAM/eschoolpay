@@ -74,7 +74,7 @@ class _ESchoolHomePageState extends State<ESchoolHomePage> {
               ),
         ),
         title: Text(
-            "E-SCHOOLPAY",
+            "Bantu SchoolPay",
             style: TextStyle(
                 color: primaryBlue,
                 fontWeight: FontWeight.bold,

@@ -31,7 +31,7 @@ class _PaymentPageState extends State<PaymentPage> {
   bool loading = false;
   //String _loadingLabel = "Traitement...";
   Timer? _paymentTimer;
-  static const int _maxAttempts = 36; // 36 × 5s = 3 minutes
+  static const int _maxAttempts = 48; // 36 × 5s = 3 minutes
 
   @override
   void dispose() {
@@ -280,10 +280,16 @@ class _PaymentPageState extends State<PaymentPage> {
     final service = PaymentService();
 
     final child = feesCtrl.selectedChild.value!;
-    final frais = feesCtrl.selectedFraisScolaire.value!;
+    final frais = feesCtrl.selectedFraisScolaire.value != null ? feesCtrl.selectedFraisScolaire.value!
+        : (feesCtrl.selectedCantineOption.value ?? feesCtrl.selectedTransportOption.value) ;
 
     //setState(() => _loadingLabel = "Envoi de la demande de paiement...");
 
+    print("=========== Affichage =================");
+    print(child.id.toString());
+    print(feesCtrl.selectedSchoolYearId.value.toString());
+    print(frais!.id.toString());
+    print(feesCtrl.totalAmount.toDouble());
     final response = await service.payerFrais(
       eleveId: int.parse(child.id.toString()),
       anneeId: int.parse(feesCtrl.selectedSchoolYearId.value.toString()),

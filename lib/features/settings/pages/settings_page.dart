@@ -81,7 +81,7 @@ class SettingsPage extends StatelessWidget {
 
           // Version de l'app
           Center(
-            child: Text("E-SCHOOLPAY v1.0.2",
+            child: Text("Bantu SchoolPay v1.0.2",
                 style: TextStyle(color: Colors.grey.shade400, fontSize: 12, letterSpacing: 1.1)),
           ),
           const SizedBox(height: 20),

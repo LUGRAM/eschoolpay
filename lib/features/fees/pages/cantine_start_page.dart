@@ -115,7 +115,7 @@ class CantineStartPage extends StatelessWidget {
                             feesCtrl.selectChild(
                                 val!,
                                 yearId.toString(),               // convertit en string seulement ici
-                                "cantine"
+                                "CANTINE"
                             );
                           }
                         },

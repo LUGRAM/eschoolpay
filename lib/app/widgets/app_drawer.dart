@@ -24,7 +24,7 @@ class AppDrawer extends StatelessWidget {
           _buildMenuItem(Icons.share_outlined, "Partager l'application", () async {
             Get.back();
             await Share.share(
-              "Télécharge E-SCHOOLPAY pour payer les frais de scolarité de tes enfants en un clic ! https://eschoolpay.ga",
+              "Télécharge Bantu SchoolPay pour payer les frais de scolarité de tes enfants en un clic ! https://eschoolpay.ga",
               subject: "Paiement scolaire simplifié",
             );
           }),

@@ -1,4 +1,4 @@
-package com.example.eschoolpay
+package com.itmasterafrica.bantuschoolpay
 
 import io.flutter.embedding.android.FlutterActivity
 

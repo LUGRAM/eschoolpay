@@ -119,18 +119,18 @@ class OnboardingPage extends StatelessWidget {
     final slides = const [
       OnboardingSlide(
         icon: Icons.backpack_rounded,
-        title: 'E-SchoolPay',
+        title: 'Bantu SchoolPay',
         subtitle:
         "Accédez directement à la scolarité de votre école, consultez les alertes de paiement et les informations importantes",
       ),
       OnboardingSlide(
         icon: Icons.payments_rounded,
-        title: 'E-SchoolPay',
+        title: 'Bantu SchoolPay',
         subtitle: "Un tableau de bord pour gérer vos paiements",
       ),
       OnboardingSlide(
         icon: Icons.groups_rounded,
-        title: 'Nouveau sur E-SchoolPay ?',
+        title: 'Nouveau sur Bantu SchoolPay ?',
         subtitle:
         "Inscrivez-vous facilement et rapidement avec votre numéro de téléphone",
       ),

@@ -14,7 +14,7 @@ class FAQPage extends StatelessWidget {
         "questions": [
           {
             "q": "Quels sont les modes de paiement acceptés ?",
-            "a": "Vous pouvez payer via Airtel Money, Moov Money ou en utilisant le solde de votre portefeuille E-SCHOOLPAY."
+            "a": "Vous pouvez payer via Airtel Money, Moov Money ou en utilisant le solde de votre portefeuille Bantu SchoolPay."
           },
           {
             "q": "Mon paiement a échoué mais j'ai été débité ?",
@@ -40,7 +40,7 @@ class FAQPage extends StatelessWidget {
         "questions": [
           {
             "q": "Mes informations sont-elles protégées ?",
-            "a": "Oui, E-SCHOOLPAY utilise un cryptage SSL de bout en bout. Nous ne stockons jamais vos codes secrets Mobile Money."
+            "a": "Oui, Bantu SchoolPay utilise un cryptage SSL de bout en bout. Nous ne stockons jamais vos codes secrets Mobile Money."
           },
         ]
       }
