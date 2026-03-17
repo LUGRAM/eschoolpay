@@ -79,7 +79,7 @@ class MonthlyFeesStartPage extends StatelessWidget {
                               print(child?.id);
                               print(child?.matricule);
                               print(prefs.get('selected_year_id'));
-                              feesCtrl.selectChild(child!, prefs.get('selected_year_id').toString());
+                              feesCtrl.selectChild(child!, prefs.get('selected_year_id').toString(), "scolarite");
                             }
                           },
                         ),

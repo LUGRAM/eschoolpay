@@ -1,3 +1,4 @@
+import 'package:eschoolpay/features/fees/models/frais_scolaire_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -85,14 +86,21 @@ class CantineStartPage extends StatelessWidget {
                               (c) => DropdownMenuItem(
                             value: c,
                             child:
-                            Text("${c.fullName} (${c.displaySchool})"),
+                            Text(c.fullName),
                           ),
                         )
                             .toList(),
                         onChanged: (val) async {
                           SharedPreferences prefs = await SharedPreferences.getInstance();
                           if (val?.id != null) {
-                            feesCtrl.selectChild(val!, prefs.getString('selected_year_id'));
+                            print(val?.id);
+                            print(val?.matricule);
+                            print(prefs.get('selected_year_id'));
+                            feesCtrl.selectChild(
+                                val!,
+                                "${prefs.getString('selected_year_id')}",
+                                "cantine"
+                            );
                           }
                         },
                       );
@@ -109,7 +117,7 @@ class CantineStartPage extends StatelessWidget {
                     const SizedBox(height: 10),
 
                     Obx(() {
-                      final options = feesCtrl.availableCantineOptions;
+                      final options = feesCtrl.fraisCantines;
 
                       if (feesCtrl.selectedChild.value == null) {
                         return Container(
@@ -157,9 +165,10 @@ class CantineStartPage extends StatelessWidget {
                       }
 
                       return Column(
-                        children: options.map((CantineOption opt) {
+                        children: options.map((opt) {
+
                           final selected =
-                              feesCtrl.selectedCantineOption.value == opt;
+                              feesCtrl.selectedFraisScolaire.value?.id == opt.id;
 
                           return GestureDetector(
                             onTap: () =>
@@ -184,7 +193,7 @@ class CantineStartPage extends StatelessWidget {
                                   horizontal: 16,
                                   vertical: 8,
                                 ),
-                                leading: Radio<CantineOption>(
+                                leading: Radio(
                                   value: opt,
                                   groupValue:
                                   feesCtrl.selectedCantineOption.value,
@@ -197,7 +206,7 @@ class CantineStartPage extends StatelessWidget {
                                   activeColor: AppColors.primarySoft,
                                 ),
                                 title: Text(
-                                  opt.label,
+                                  opt.libelle,
                                   style: TextStyle(
                                     fontWeight: selected
                                         ? FontWeight.bold
@@ -205,12 +214,12 @@ class CantineStartPage extends StatelessWidget {
                                     fontSize: 15,
                                   ),
                                 ),
-                                subtitle: opt.note != null
+                                subtitle: opt.libelle != null
                                     ? Padding(
                                   padding:
                                   const EdgeInsets.only(top: 4),
                                   child: Text(
-                                    opt.note!,
+                                    opt.libelle!,
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey,
@@ -219,7 +228,7 @@ class CantineStartPage extends StatelessWidget {
                                 )
                                     : null,
                                 trailing: Text(
-                                  "${opt.amount} FCFA",
+                                  "${opt.montant} FCFA",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -248,7 +257,7 @@ class CantineStartPage extends StatelessWidget {
                 children: [
                   Obx(() {
                     final amount =
-                        feesCtrl.selectedCantineOption.value?.amount ?? 0;
+                        feesCtrl.selectedCantineOption.value?.montant ?? 0;
 
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 300),

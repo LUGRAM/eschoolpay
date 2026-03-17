@@ -67,12 +67,14 @@ class ApiClient {
   static Future<List<FraisScolaireModel>> getFraisScolaire({
     required String childId,
     required String yearId,
+    required String type
   }) async {
 
     final uri = Uri.parse("$baseUrl/frais-scolaires").replace(
       queryParameters: {
         "child_id": childId,
         "annee_scolaire_id": yearId,
+        "type": type
       },
     );
 
@@ -90,7 +92,7 @@ class ApiClient {
 
     final Map<String, dynamic> body = jsonDecode(response.body);
 
-    final List data = body["data"]; // 🔥 la clé importante
+    final List data = body["data"]; // la clé importante
 
     return data
         .map((e) => FraisScolaireModel.fromJson(e))

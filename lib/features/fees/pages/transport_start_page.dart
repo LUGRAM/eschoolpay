@@ -94,7 +94,7 @@ class TransportStartPage extends StatelessWidget {
                         onChanged: (val) async {
                           SharedPreferences prefs = await SharedPreferences.getInstance();
                           if (val?.id != null) {
-                            feesCtrl.selectChild(val!, prefs.getString('selected_year_id'));
+                            feesCtrl.selectChild(val!, prefs.getString('selected_year_id').toString(), "transport");
                           }
                         },
                       );
@@ -111,7 +111,7 @@ class TransportStartPage extends StatelessWidget {
                     const SizedBox(height: 10),
 
                     Obx(() {
-                      final options = feesCtrl.availableTransportOptions;
+                      final options = feesCtrl.fraisTransports;
 
                       if (feesCtrl.selectedChild.value == null) {
                         return Container(
@@ -159,9 +159,9 @@ class TransportStartPage extends StatelessWidget {
                       }
 
                       return Column(
-                        children: options.map((TransportOption opt) {
+                        children: options.map((opt) {
                           final selected =
-                              feesCtrl.selectedTransportOption.value == opt;
+                              feesCtrl.selectedTransportOption.value?.id == opt.id;
 
                           return GestureDetector(
                             onTap: () => feesCtrl
@@ -186,7 +186,7 @@ class TransportStartPage extends StatelessWidget {
                                   horizontal: 16,
                                   vertical: 8,
                                 ),
-                                leading: Radio<TransportOption>(
+                                leading: Radio(
                                   value: opt,
                                   groupValue: feesCtrl
                                       .selectedTransportOption.value,
@@ -199,7 +199,7 @@ class TransportStartPage extends StatelessWidget {
                                   activeColor: AppColors.primarySoft,
                                 ),
                                 title: Text(
-                                  opt.label,
+                                  opt.libelle,
                                   style: TextStyle(
                                     fontWeight: selected
                                         ? FontWeight.bold
@@ -207,12 +207,12 @@ class TransportStartPage extends StatelessWidget {
                                     fontSize: 15,
                                   ),
                                 ),
-                                subtitle: opt.note != null
+                                subtitle: opt.libelle != null
                                     ? Padding(
                                   padding:
                                   const EdgeInsets.only(top: 4),
                                   child: Text(
-                                    opt.note!,
+                                    opt.libelle!,
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey,
@@ -221,7 +221,7 @@ class TransportStartPage extends StatelessWidget {
                                 )
                                     : null,
                                 trailing: Text(
-                                  "${opt.amount} FCFA",
+                                  "${opt.montant} FCFA",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -250,7 +250,7 @@ class TransportStartPage extends StatelessWidget {
                 children: [
                   Obx(() {
                     final amount =
-                        feesCtrl.selectedTransportOption.value?.amount ?? 0;
+                        feesCtrl.selectedTransportOption.value?.montant ?? 0;
 
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
