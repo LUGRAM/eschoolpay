@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../../../../app/router/routes.dart';
 
@@ -14,6 +15,7 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage> {
 
   // pour rediriger toujours vers la page d'onboarding après 3 secondes
+  /*
   @override
   void initState() {
     super.initState();
@@ -22,8 +24,10 @@ class _SplashPageState extends State<SplashPage> {
         const Duration(seconds: 3), () => Get.offNamed(Routes.onboarding));
   }
 
+   */
+
   /// pour afficher le splash qu'une seule fois
-  /*
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +46,7 @@ class _SplashPageState extends State<SplashPage> {
       Get.offNamed(Routes.onboarding);
     }
   }
-*/
+
 
   @override
   Widget build(BuildContext context) {

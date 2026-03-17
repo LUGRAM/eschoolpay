@@ -90,7 +90,7 @@ class CantineStartPage extends StatelessWidget {
                           ),
                         )
                             .toList(),
-                        onChanged: (val) async {
+                        /*onChanged: (val) async {
                           SharedPreferences prefs = await SharedPreferences.getInstance();
                           if (val?.id != null) {
                             print(val?.id);
@@ -99,6 +99,22 @@ class CantineStartPage extends StatelessWidget {
                             feesCtrl.selectChild(
                                 val!,
                                 "${prefs.getString('selected_year_id')}",
+                                "cantine"
+                            );
+                          }
+                        },*/
+                        onChanged: (val) async {
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          if (val?.id != null) {
+                            print(val?.id);
+                            print(val?.matricule);
+
+                            // Récupère en tant qu'entier
+                            final yearId = prefs.getInt('selected_year_id') ?? 0;  // 0 = fallback safe
+
+                            feesCtrl.selectChild(
+                                val!,
+                                yearId.toString(),               // convertit en string seulement ici
                                 "cantine"
                             );
                           }

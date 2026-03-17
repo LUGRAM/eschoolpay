@@ -17,7 +17,7 @@ Widget buildYearSelector({
       borderRadius: BorderRadius.circular(16),
       boxShadow: [
         BoxShadow(
-          color: primaryBlue.withOpacity(0.35),
+          color: primaryBlue.withValues(alpha: 0.35),
           blurRadius: 12,
           offset: const Offset(0, 6),
         ),
@@ -168,10 +168,10 @@ class _YearMenuItem extends StatelessWidget {
             width: 26,
             height: 26,
             decoration: BoxDecoration(
-              color: selected ? primaryBlue.withOpacity(0.10) : Colors.grey.shade100,
+              color: selected ? primaryBlue.withValues(alpha: 0.10) : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: selected ? primaryBlue.withOpacity(0.25) : Colors.grey.shade200,
+                color: selected ? primaryBlue.withValues(alpha: 0.25) : Colors.grey.shade200,
               ),
             ),
             child: Icon(
@@ -200,9 +200,9 @@ class _YearMenuItem extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: primaryBlue.withOpacity(0.10),
+                color: primaryBlue.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: primaryBlue.withOpacity(0.18)),
+                border: Border.all(color: primaryBlue.withValues(alpha: 0.18)),
               ),
               child: const Text(
                 "Active",
