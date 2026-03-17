@@ -131,7 +131,7 @@ class AppDrawer extends StatelessWidget {
                               onTap: () {
                                 Get.back();
                                 // Nettoyage
-                                Get.offAllNamed(Routes.authWelcome);
+                                Get.offAllNamed(Routes.onboarding);
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(vertical: 14),
