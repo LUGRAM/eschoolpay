@@ -3,6 +3,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../../core/services/auth_service.dart';
 import '../../../app/router/routes.dart';
+import '../../children/controllers/children_controller.dart';
 
 class AuthController extends GetxController {
   final AuthService _service = AuthService();
@@ -49,14 +50,9 @@ class AuthController extends GetxController {
   // Téléphone + mot de passe (ou code) selon ton backend
   Future<bool> login({required String phone, required String password}) async {
     isLoading.value = true;
-
     try {
-      final decoded = await _service.login(
-        phone: phone,
-        //password: password, //  à envoyer si ton API le demande
-      );
-
-      final token = decoded?['token']; //  backend
+      final decoded = await _service.login(phone: phone);
+      final token = decoded?['token'];
       final user = decoded?['user'];
 
       if (token != null) {
@@ -70,9 +66,10 @@ class AuthController extends GetxController {
           _storage.write('user_phone', user['phone']);
         }
 
+        Get.find<ChildrenController>().fetchChildren();
+
         return true;
       }
-
       return false;
     } catch (_) {
       return false;
@@ -80,7 +77,6 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
-
   // ========= LOGOUT =========
   void logout() {
     _storage.remove('auth_token');
