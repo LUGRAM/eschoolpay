@@ -1,31 +1,23 @@
+// features/children/models/child_model.dart
+
 import 'package:intl/intl.dart';
 
 class ChildModel {
   final String? id;
-
-  // API: nom / prenom
   final String firstName;
   final String lastName;
-
-  /// UI: dd/MM/yyyy
   final String birthDate;
   final String birthPlace;
-
-  /// requis par swagger: sexe (string)
-  /// (ex: "M" / "F")
   final String sexe;
-
-  /// requis par swagger: matricule (string)
-  /// si ton backend accepte auto, tu peux le générer côté app (voir helper)
   final String matricule;
 
-  /// optionnel: chemin local fichier photo (pour multipart)
+  /// Chemin local après crop (avant upload)
   final String? photoPath;
 
-  /// champ requis par swagger: parent_model_id (int)
-  final int parentId;
+  /// URL distante retournée par l'API après upload
+  final String? photoUrl;
 
-  /// champs additionnels optionnels (classe_id, ecole_id, etc.)
+  final int parentId;
   final Map<String, String> extras;
 
   const ChildModel({
@@ -38,17 +30,24 @@ class ChildModel {
     required this.matricule,
     required this.parentId,
     this.photoPath,
+    this.photoUrl,
     this.extras = const {},
   });
 
   String get fullName => "$firstName $lastName";
 
-  // -----------------------------
-  // API -> Model
-  // -----------------------------
+  // ─── API → Model ─────────────────────────────────────────────
   factory ChildModel.fromApi(Map<String, dynamic> json) {
     final apiDate = (json['date_naissance'] ?? '').toString();
     final uiDate = _toUiDate(apiDate);
+
+    // L'API retourne "photo" qui peut être null ou une URL complète
+    const _baseStorageUrl = 'https://eschool.itmaster-africa.com/storage/';
+
+    final rawPhoto = json['photo']?.toString();
+    final photoUrl = (rawPhoto != null && rawPhoto.isNotEmpty)
+        ? (rawPhoto.startsWith('http') ? rawPhoto : '$_baseStorageUrl$rawPhoto')
+        : null;
 
     return ChildModel(
       id: (json['id'] ?? '').toString(),
@@ -58,26 +57,30 @@ class ChildModel {
       birthPlace: (json['lieu_naissance'] ?? '').toString(),
       sexe: (json['sexe'] ?? 'M').toString(),
       matricule: (json['matricule'] ?? '').toString(),
-      parentId: int.tryParse((json['parent_model_id'] ?? 0).toString()) ?? 0,
-
+      parentId: int.tryParse(
+          (json['parent_model_id'] ??
+              json['parentProfile']?['id'] ??
+              0)
+              .toString()) ??
+          0,
+      photoUrl: photoUrl,
       extras: {
         "school_id": (json['school_id'] ?? '').toString(),
         "grade": (json['grade'] ?? '').toString(),
         "academic_year": (json['academic_year'] ?? '').toString(),
         "school_name": (json['school_name'] ?? '').toString(),
+        "niveau_id": (json['niveau_id'] ?? '').toString(),
       },
     );
   }
 
-  // -----------------------------
-  // Model -> multipart fields
-  // -----------------------------
+  // ─── Model → multipart fields ─────────────────────────────────
   Map<String, String> toMultipartFields() {
     return {
       "matricule": matricule,
       "nom": lastName,
       "prenom": firstName,
-      "date_naissance": _toApiDate(birthDate), // yyyy-MM-dd
+      "date_naissance": _toApiDate(birthDate),
       "lieu_naissance": birthPlace,
       "sexe": sexe,
       "parent_model_id": parentId.toString(),
@@ -85,6 +88,7 @@ class ChildModel {
     };
   }
 
+  // ─── copyWith ─────────────────────────────────────────────────
   ChildModel copyWith({
     String? id,
     String? firstName,
@@ -95,6 +99,8 @@ class ChildModel {
     String? matricule,
     int? parentId,
     String? photoPath,
+    String? photoUrl,
+    bool clearPhotoPath = false,
     Map<String, String>? extras,
   }) {
     return ChildModel(
@@ -106,21 +112,19 @@ class ChildModel {
       sexe: sexe ?? this.sexe,
       matricule: matricule ?? this.matricule,
       parentId: parentId ?? this.parentId,
-      photoPath: photoPath ?? this.photoPath,
+      photoPath: clearPhotoPath ? null : (photoPath ?? this.photoPath),
+      photoUrl: photoUrl ?? this.photoUrl,
       extras: extras ?? this.extras,
     );
   }
 
-  // -----------------------------
-  // Helpers dates
-  // -----------------------------
+  // ─── Helpers dates ────────────────────────────────────────────
   static String _toUiDate(String apiDate) {
     if (apiDate.isEmpty) return "";
     try {
       final dt = DateTime.parse(apiDate);
       return DateFormat("dd/MM/yyyy").format(dt);
     } catch (_) {
-      // si déjà dd/MM/yyyy
       return apiDate;
     }
   }
@@ -131,22 +135,15 @@ class ChildModel {
       final dt = DateFormat("dd/MM/yyyy").parse(uiDate);
       return DateFormat("yyyy-MM-dd").format(dt);
     } catch (_) {
-      // si déjà yyyy-MM-dd
       return uiDate;
     }
   }
 
-  // -----------------------------
-  // Helper matricule (si besoin)
-  // -----------------------------
   static String generateMatricule() {
     final now = DateTime.now();
     return "MAT-${now.year}${now.month.toString().padLeft(2, '0')}${now.millisecond}";
   }
 
-  // ----------------------------
-  // Helper date
-  // ----------------------------
   bool get isAlreadyRegisteredThisYear =>
       academicYear == currentAcademicYear;
 
@@ -156,16 +153,13 @@ class ChildModel {
     return "$startYear-${startYear + 1}";
   }
 
-
-  // Ces getters garantissent un String non-nul pour tes widgets
   String get displaySchool => schoolName ?? "Non renseignée";
-  //String get displayGrade => grade ?? "Niveau non renseignée";
+
   String get displayGrade {
     final g = grade;
     if (g == null || g.isEmpty) return "";
     return g;
   }
-
 }
 
 extension ChildExtras on ChildModel {
@@ -174,4 +168,3 @@ extension ChildExtras on ChildModel {
   String? get academicYear => extras["academic_year"];
   String? get schoolName => extras["school_name"];
 }
-

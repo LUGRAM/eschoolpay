@@ -204,10 +204,11 @@ class _AddChildPageState extends State<AddChildPage> {
 
                   const SizedBox(height: 22),
 
-                  GradientButton(
+                  Obx(() => GradientButton(
                     label: "Enregistrer l'enfant",
-                    onTap: _submit,
-                  ),
+                    loading: childrenCtrl.isLoading.value,
+                    onTap: childrenCtrl.isLoading.value ? null : _submit,
+                  )),
                 ],
               ),
             ),

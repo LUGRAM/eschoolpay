@@ -39,6 +39,8 @@ class AnneeScolaireController extends GetxController {
     selectedYear.value = year;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('selected_year_id', year.id);
+    print('📅 [AnneeCtrl] Année sélectionnée → id=${year.id} label=${year.annee_scolaire}');
+
   }
 
   Future<void>_restoreYear() async {

@@ -1,3 +1,6 @@
+// features/profile/pages/edit_profile_sheet.dart
+
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,10 +20,9 @@ class EditProfileSheet extends StatefulWidget {
 class _EditProfileSheetState extends State<EditProfileSheet> {
   final _formKey = GlobalKey<FormState>();
 
-  final _nameCtrl = TextEditingController();
+  final _nameCtrl  = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
 
   final ProfileController controller = Get.find<ProfileController>();
 
@@ -29,9 +31,9 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
     super.initState();
     final user = controller.profile.value;
     if (user != null) {
-      _nameCtrl.text = user.name;
+      _nameCtrl.text  = user.name;
       _emailCtrl.text = user.email;
-      _phoneCtrl.text = user.phone ?? "";
+      _phoneCtrl.text = user.phone ?? '';
     }
   }
 
@@ -40,7 +42,6 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
-    _passwordCtrl.dispose();
     super.dispose();
   }
 
@@ -55,10 +56,8 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              "Photo de profil",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            const Text("Photo de profil",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.photo_library, color: Color(0xFF063D66)),
@@ -94,7 +93,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
 
         return CustomScrollView(
           slivers: [
-            // ─── HEADER identique au ChildDetailPage ─────────────
+            // ─── HEADER ─────────────────────────────────────────
             SliverAppBar(
               expandedHeight: 240,
               pinned: true,
@@ -106,33 +105,28 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
               ),
               title: const Text(
                 "Modifier le profil",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w700),
               ),
               flexibleSpace: FlexibleSpaceBar(
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Dégradé identique
+                    // Dégradé
                     Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFF063D66),
-                            Color(0xFF1976D2),
-                          ],
+                          colors: [Color(0xFF063D66), Color(0xFF1976D2)],
                         ),
                       ),
                     ),
-
-                    // Cercles décoratifs identiques
+                    // Cercles déco
                     Positioned(
-                      top: -40,
-                      right: -40,
+                      top: -40, right: -40,
                       child: Container(
-                        width: 160,
-                        height: 160,
+                        width: 160, height: 160,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white.withValues(alpha: 0.06),
@@ -140,11 +134,9 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                       ),
                     ),
                     Positioned(
-                      bottom: 30,
-                      left: -30,
+                      bottom: 30, left: -30,
                       child: Container(
-                        width: 100,
-                        height: 100,
+                        width: 100, height: 100,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white.withValues(alpha: 0.05),
@@ -154,9 +146,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
 
                     // Avatar + nom
                     Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
+                      bottom: 0, left: 0, right: 0,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -167,8 +157,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                               alignment: Alignment.bottomRight,
                               children: [
                                 Container(
-                                  width: 90,
-                                  height: 90,
+                                  width: 90, height: 90,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
@@ -184,14 +173,20 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                                     ],
                                   ),
                                   child: ClipOval(
-                                    child: user.photoUrl != null
-                                        ? Image.network(
-                                      user.photoUrl!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) =>
-                                          _avatarFallback(user.name),
-                                    )
-                                        : _avatarFallback(user.name),
+                                    child: Obx(() {
+                                      if (controller.isUploadingPhoto.value) {
+                                        return Container(
+                                          color: Colors.white.withValues(alpha: 0.15),
+                                          child: const Center(
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2.5,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      return _buildAvatar(user.photoUrl, user.name);
+                                    }),
                                   ),
                                 ),
                                 // Badge caméra
@@ -207,11 +202,8 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                                       ),
                                     ],
                                   ),
-                                  child: const Icon(
-                                    Icons.camera_alt,
-                                    size: 14,
-                                    color: Color(0xFF063D66),
-                                  ),
+                                  child: const Icon(Icons.camera_alt,
+                                      size: 14, color: Color(0xFF063D66)),
                                 ),
                               ],
                             ),
@@ -246,14 +238,11 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                                 Icon(Icons.verified_user_outlined,
                                     size: 13, color: Colors.white),
                                 SizedBox(width: 5),
-                                Text(
-                                  "Parent",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                                Text("Parent",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)),
                               ],
                             ),
                           ),
@@ -266,7 +255,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
               ),
             ),
 
-            // ─── FORMULAIRE ──────────────────────────────────────
+            // ─── FORMULAIRE ─────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -275,8 +264,6 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                   child: Column(
                     children: [
                       const SizedBox(height: 8),
-
-                      // ── Section coordonnées ───────────────────
                       _SectionCard(
                         title: "Informations personnelles",
                         icon: Icons.person_outline_rounded,
@@ -317,14 +304,11 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
 
                       const SizedBox(height: 28),
 
-                      // ── Bouton enregistrer ────────────────────
+                      // ── Bouton avec loading ───────────────────
                       Obx(() => GradientButton(
-                        label: controller.isLoading.value
-                            ? "Enregistrement..."
-                            : "Enregistrer les modifications",
-                        onTap: controller.isLoading.value
-                            ? null
-                            : _saveData,
+                        label: "Enregistrer les modifications",
+                        loading: controller.isLoading.value,
+                        onTap: controller.isLoading.value ? null : _saveData,
                       )),
 
                       const SizedBox(height: 24),
@@ -339,18 +323,41 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
     );
   }
 
-  // ─── Avatar fallback avec initiale ───────────────────────────
-  Widget _avatarFallback(String name) {
+  // ─── Avatar : réseau > local > initiale ──────────────────────
+  Widget _buildAvatar(String? photoUrl, String name) {
+    if (photoUrl != null && photoUrl.isNotEmpty) {
+      // URL réseau
+      if (photoUrl.startsWith('http')) {
+        return Image.network(
+          photoUrl,
+          fit: BoxFit.cover,
+          width: 90, height: 90,
+          errorBuilder: (_, __, ___) => _fallback(name),
+        );
+      }
+      // Chemin local (optimistic UI avant upload réel)
+      if (File(photoUrl).existsSync()) {
+        return Image.file(
+          File(photoUrl),
+          fit: BoxFit.cover,
+          width: 90, height: 90,
+          errorBuilder: (_, __, ___) => _fallback(name),
+        );
+      }
+    }
+    return _fallback(name);
+  }
+
+  Widget _fallback(String name) {
     return Container(
       color: Colors.white.withValues(alpha: 0.15),
       child: Center(
         child: Text(
-          name.isNotEmpty ? name[0].toUpperCase() : "P",
+          name.isNotEmpty ? name[0].toUpperCase() : 'P',
           style: const TextStyle(
-            color: Colors.white,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -359,7 +366,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
   void _saveData() {
     if (_formKey.currentState!.validate()) {
       controller.updateProfile(
-        name: _nameCtrl.text.trim(),
+        name:  _nameCtrl.text.trim(),
         email: _emailCtrl.text.trim(),
         phone: _phoneCtrl.text.trim(),
       );
@@ -397,7 +404,6 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // En-tête section
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
             child: Row(
@@ -411,30 +417,24 @@ class _SectionCard extends StatelessWidget {
                   child: Icon(icon, size: 16, color: AppColors.primarySoft),
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                    letterSpacing: 0.2,
-                  ),
-                ),
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 0.2)),
               ],
             ),
           ),
           const Divider(height: 1, thickness: 1),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: child,
-          ),
+          Padding(padding: const EdgeInsets.all(16), child: child),
         ],
       ),
     );
   }
 }
 
-// ─── FIELD ROW avec label ─────────────────────────────────────────
+// ─── FIELD ROW ───────────────────────────────────────────────────
 class _FieldRow extends StatelessWidget {
   final String label;
   final Widget child;
@@ -451,15 +451,12 @@ class _FieldRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textMuted,
-            letterSpacing: 0.3,
-          ),
-        ),
+        Text(label,
+            style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textMuted,
+                letterSpacing: 0.3)),
         const SizedBox(height: 6),
         child,
         if (!isLast) const SizedBox(height: 4),

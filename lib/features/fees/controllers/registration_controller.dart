@@ -30,6 +30,9 @@ class RegistrationController extends GetxController {
       final level = schoolsCtrl.selectedLevel.value!;
       final annee = anneeCtrl.selectedYear.value!;
 
+      print('📅 [RegistrationCtrl] confirmRegistration → anneeId=${annee.id} label=${annee.annee_scolaire}');
+      print('📅 [RegistrationCtrl] enfant=${child.fullName} école=${school.name} niveau=${level.name}');
+
       final result = await service.createInscription(
         eleveId: int.parse(child.id!),
         levelId: int.parse(level.id.toString()),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -94,11 +96,16 @@ class _ESchoolHomePageState extends State<ESchoolHomePage> {
                 final profileCtrl = Get.find<ProfileController>();
                 final photoUrl = profileCtrl.profile.value?.photoUrl;
 
+                ImageProvider? provider;
+                if (photoUrl != null && photoUrl.isNotEmpty) {
+                  provider = photoUrl.startsWith('http')
+                      ? NetworkImage(photoUrl)
+                      : FileImage(File(photoUrl)) as ImageProvider;
+                }
+
                 return CircleAvatar(
                   backgroundColor: primaryBlue,
-                  backgroundImage: photoUrl != null
-                      ? NetworkImage(photoUrl)
-                      : null,
+                  backgroundImage: provider,
                   child: photoUrl == null
                       ? const Icon(Icons.person, color: Colors.white)
                       : null,
