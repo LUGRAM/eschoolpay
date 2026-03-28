@@ -124,6 +124,7 @@ class FeesController extends GetxController {
 
   void selectChild(ChildModel child, String schoolYearId, String type) async {
     print(type);
+    print('📅 [FeesCtrl] selectChild → yearId=$schoolYearId enfant=${child.fullName}');
 
     selectedChild.value = child;
     selectedSchoolYearId.value = schoolYearId.toString();

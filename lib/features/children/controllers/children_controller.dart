@@ -1,17 +1,21 @@
+// features/children/controllers/children_controller.dart
+
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/network/api_client.dart';
 import '../models/child_model.dart';
 import '../services/children_service.dart';
 
 class ChildrenController extends GetxController {
-
   final ChildrenService _service = ChildrenService();
   final children = <ChildModel>[].obs;
   final isLoading = false.obs;
+  final isUploadingPhoto = false.obs;
 
   final GetStorage _box = GetStorage();
   final ImagePicker _picker = ImagePicker();
@@ -22,49 +26,37 @@ class ChildrenController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
-    print(isLoggedIn);
-    //  Ne charge les enfants QUE si connecté
-    if (isLoggedIn) {
-      fetchChildren();
-    }
+    debugPrint('ChildrenController isLoggedIn: $isLoggedIn');
+    if (isLoggedIn) fetchChildren();
   }
 
-  // ================= FETCH =================
+  // ─── FETCH ───────────────────────────────────────────────────
   Future<void> fetchChildren() async {
     if (!isLoggedIn) return;
-
     try {
       isLoading.value = true;
-
       final result = await _service.fetchChildren();
       children.assignAll(result);
-
     } catch (e) {
-
       if (e.toString().contains("401")) {
         Get.snackbar("Session expirée", "Veuillez vous reconnecter");
       } else {
         Get.snackbar("Erreur", "Impossible de charger les enfants");
       }
-
     } finally {
       isLoading.value = false;
     }
   }
 
-  // ================= CREATE =================
+  // ─── CREATE ──────────────────────────────────────────────────
   Future<bool> createChild(ChildModel child) async {
-  try {
+    try {
       isLoading.value = true;
-
-      final fields = child.toMultipartFields(); // contient déjà parent_model_id
+      final fields = child.toMultipartFields();
       final photo = child.photoPath != null ? File(child.photoPath!) : null;
-
       await _service.createChild(fields: fields, photo: photo);
       await fetchChildren();
       return true;
-
     } catch (e) {
       debugPrint("createChild error: $e");
       Get.snackbar("Erreur", e.toString().replaceAll("Exception: ", ""));
@@ -73,12 +65,72 @@ class ChildrenController extends GetxController {
       isLoading.value = false;
     }
   }
-  String _convertDate(String input) {
-    final parts = input.split('/');
-    return "${parts[2]}-${parts[1]}-${parts[0]}";
+
+  // ─── UPDATE PHOTO ENFANT ──────────────────────────────────────
+  // Appelle PUT /api/eleves/{id} avec la photo en multipart
+  Future<void> updateChildPhoto(String childId, ImageSource source) async {
+    try {
+      // 1. Sélection + crop
+      final path = await pickAndCrop(source: source);
+      if (path == null) return;
+
+      isUploadingPhoto.value = true;
+
+      // 2. Upload vers l'API
+      final streamed = await ApiClient.multipart(
+        endpoint: "/eleves/$childId",
+        method: 'POST', // utilise POST avec _method=PUT si l'API le requiert
+        fileField: "photo",
+        file: File(path),
+        fields: {"_method": "PUT"}, // Laravel method spoofing
+      );
+
+      final body = await streamed.stream.bytesToString();
+      debugPrint('📸 updateChildPhoto status: ${streamed.statusCode}');
+      debugPrint('📸 updateChildPhoto body: $body');
+
+      if (streamed.statusCode == 200 || streamed.statusCode == 201) {
+        final decoded = jsonDecode(body);
+        final data = decoded['data'] ?? decoded;
+
+        // 3. Récupère l'URL retournée par l'API
+        final newPhotoUrl = data['photo']?.toString() ??
+            data['photo_url']?.toString();
+
+        // 4. Met à jour le model en mémoire
+        final index = children.indexWhere((c) => c.id == childId);
+        if (index != -1) {
+          children[index] = children[index].copyWith(
+            photoUrl: newPhotoUrl,
+            photoPath: path, // garde le local en fallback
+          );
+          children.refresh();
+        }
+
+        Get.snackbar("Succès", "Photo mise à jour",
+            backgroundColor: Colors.green.shade50,
+            colorText: Colors.green.shade800);
+      } else {
+        Get.snackbar("Erreur", "Impossible de mettre à jour la photo");
+      }
+    } catch (e) {
+      debugPrint("updateChildPhoto error: $e");
+      Get.snackbar("Erreur", "Une erreur est survenue");
+    } finally {
+      isUploadingPhoto.value = false;
+    }
   }
 
-  // ================= IMAGE =================
+  // ─── UPDATE EXTRAS ────────────────────────────────────────────
+  void updateChildExtras(String childId, Map<String, String> newExtras) {
+    final index = children.indexWhere((c) => c.id == childId);
+    if (index == -1) return;
+    final updated = children[index].copyWith(extras: newExtras);
+    children[index] = updated;
+    children.refresh();
+  }
+
+  // ─── PICK & CROP ─────────────────────────────────────────────
   Future<String?> pickAndCrop({required ImageSource source}) async {
     try {
       final XFile? picked = await _picker.pickImage(
@@ -88,9 +140,7 @@ class ChildrenController extends GetxController {
       );
       if (picked == null) return null;
 
-      if (Platform.isWindows) {
-        return picked.path;
-      }
+      if (Platform.isWindows) return picked.path;
 
       final CroppedFile? cropped = await ImageCropper().cropImage(
         sourcePath: picked.path,
@@ -114,19 +164,8 @@ class ChildrenController extends GetxController {
       );
 
       return cropped?.path;
-
     } catch (_) {
       return null;
     }
-  }
-
-  // Ajoute cette méthode dans ChildrenController
-  void updateChildExtras(String childId, Map<String, String> newExtras) {
-    final index = children.indexWhere((c) => c.id == childId);
-    if (index == -1) return;
-
-    final updated = children[index].copyWith(extras: newExtras);
-    children[index] = updated;
-    children.refresh(); // ✅ Force le Obx à se reconstruire
   }
 }

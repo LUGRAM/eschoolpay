@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart'; // N'oublie pas d'ajouter ce package dans ton pubspec.yaml
 import '../../features/profile/controllers/profile_controller.dart';
 import '../../features/support/pages/about_faq_page.dart';
 import '../../features/support/pages/faq_page.dart';
+import '../../features/support/pages/privacy_policy_page.dart';
 import '../router/routes.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -16,7 +19,7 @@ class AppDrawer extends StatelessWidget {
         children: [
           _buildHeader(),
           _buildMenuItem(Icons.privacy_tip_outlined, "Politique de confidentialité", () {
-            // Logique WebView ou Dialog
+            Get.to(() => const PrivacyPolicyPage());
           }),
           _buildMenuItem(Icons.info_outline, "À propos de nous", () {
             Get.to(() => const AboutFaqPage());
@@ -207,8 +210,18 @@ class AppDrawer extends StatelessWidget {
 
   Widget _buildHeader() {
     final profileCtrl = Get.find<ProfileController>();
+    final photoUrl = profileCtrl.profile.value?.photoUrl;
+
     return Obx(() {
       final user = profileCtrl.profile.value;
+
+      ImageProvider? provider;
+      if (photoUrl != null && photoUrl.isNotEmpty) {
+        provider = photoUrl.startsWith('http')
+            ? NetworkImage(photoUrl)
+            : FileImage(File(photoUrl)) as ImageProvider;
+      }
+
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
@@ -221,8 +234,8 @@ class AppDrawer extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 35,
-              backgroundColor: Colors.white,
-              backgroundImage: user?.photoUrl != null ? NetworkImage(user!.photoUrl!) : null,
+              backgroundColor: Colors.white60,
+              backgroundImage: provider,
               child: user?.photoUrl == null ? const Icon(Icons.person, size: 40, color: Color(0xFF063D66)) : null,
             ),
             const SizedBox(height: 15),

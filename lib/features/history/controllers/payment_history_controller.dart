@@ -26,8 +26,11 @@ class PaymentHistoryController extends GetxController {
   // ─── Récupère l'annee_scolaire_id courant ────────────────────
   int get _anneeId {
     try {
-      return Get.find<AnneeScolaireController>().selectedYear.value?.id ?? 1;
+       final id = Get.find<AnneeScolaireController>().selectedYear.value?.id ?? 1;
+       print('📅 [HistoryCtrl] anneeId=$id');
+       return id;
     } catch (_) {
+      print('📅 [HistoryCtrl] anneeId=1 (fallback)');
       return 1;
     }
   }
