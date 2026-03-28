@@ -1,4 +1,4 @@
-import 'package:eschoolpay/core/network/api_client.dart';
+import 'package:bantuschoolpay/core/network/api_client.dart';
 import 'package:get/get.dart';
 import '../../children/models/child_model.dart';
 import '../data/mock_transport_options.dart';
@@ -142,6 +142,8 @@ class FeesController extends GetxController {
 
       isLoadingFrais.value = true;
 
+      print("Data sent to back");
+
       final result = await ApiClient.getFraisScolaire(
         childId: childId,
         yearId: yearId,
@@ -149,7 +151,6 @@ class FeesController extends GetxController {
       );
 
       fraisScolaires.value = result;
-
       print(fraisScolaires);
 
     } catch (e) {

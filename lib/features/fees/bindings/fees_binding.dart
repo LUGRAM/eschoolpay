@@ -1,5 +1,5 @@
-import 'package:eschoolpay/features/fees/controllers/registration_controller.dart';
-import 'package:eschoolpay/features/schools/services/level_service.dart';
+import 'package:bantuschoolpay/features/fees/controllers/registration_controller.dart';
+import 'package:bantuschoolpay/features/schools/services/level_service.dart';
 import 'package:get/get.dart';
 import '../../children/controllers/children_controller.dart';
 import '../../schools/controllers/schools_controller.dart';

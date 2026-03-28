@@ -1,4 +1,4 @@
-import 'package:eschoolpay/app/router/routes.dart';
+import 'package:bantuschoolpay/app/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -6,8 +6,8 @@ import 'binding/auth_binding.dart';
 import 'router/app_pages.dart';
 import 'theme/app_theme.dart';
 
-class ESchoolPayApp extends StatelessWidget {
-  const ESchoolPayApp({super.key});
+class BantuSchoolPayApp extends StatelessWidget {
+  const BantuSchoolPayApp({super.key});
 
   @override
   Widget build(BuildContext context) {

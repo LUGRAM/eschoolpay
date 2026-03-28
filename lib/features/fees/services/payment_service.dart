@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:eschoolpay/core/network/api_client.dart';
+import 'package:bantuschoolpay/core/network/api_client.dart';
 import 'package:http/http.dart' as http;
 
 class PaymentService {

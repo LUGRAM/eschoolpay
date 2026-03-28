@@ -10,5 +10,5 @@ Future<void> main() async {
   Get.put(ChildrenController(), permanent: true);
   //Get.put(Controller(), permanent: true);
   //Get.put(ChildrenController(), permanent: true);
-  runApp(const ESchoolPayApp());
+  runApp(const BantuSchoolPayApp());
 }

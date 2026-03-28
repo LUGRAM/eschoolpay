@@ -150,8 +150,8 @@ class _PhoneSigninPageState extends State<PhoneSigninPage> {
             const SizedBox(height: 24),
 
             Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              child: Wrap(
+                alignment: WrapAlignment.center,
                 children: [
                   Text(
                     "Pas encore de compte ? ",

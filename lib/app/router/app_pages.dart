@@ -1,4 +1,4 @@
-import 'package:eschoolpay/app/binding/auth_binding.dart';
+import 'package:bantuschoolpay/app/binding/auth_binding.dart';
 import 'package:get/get.dart';
 
 // Importations des Pages et Controllers
@@ -27,7 +27,7 @@ import '../../features/history/pages/payment_detail_page.dart';
 
 
 // 1. DÉFINITION DES NOMS DE ROUTES
-import 'package:eschoolpay/app/router/routes.dart';
+import 'package:bantuschoolpay/app/router/routes.dart';
 
 // 2. CONFIGURATION DES PAGES ET BINDINGS
 class AppPages {

@@ -1,6 +1,6 @@
 {
-    "name": "eschoolpay",
-    "short_name": "eschoolpay",
+    "name": "bantuschoolpay",
+    "short_name": "bantuschoolpay",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

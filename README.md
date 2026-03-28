@@ -1,4 +1,4 @@
-# eschoolpay
+# bantuschoolpay
 
 A new Flutter project.
 
