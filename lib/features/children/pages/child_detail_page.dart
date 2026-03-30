@@ -317,7 +317,7 @@ class ChildDetailPage extends StatelessWidget {
   }
 
   // ─── Bottom sheet photo ───────────────────────────────────────
-  void _showPhotoOptions(
+  /*void _showPhotoOptions(
       BuildContext context,
       ChildModel child,
       ChildrenController ctrl,
@@ -364,6 +364,58 @@ class ChildDetailPage extends StatelessWidget {
         ),
       ),
     );
+  }*/
+  void _showPhotoOptions(
+      BuildContext context,
+      ChildModel child,
+      ChildrenController ctrl,
+      ) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Photo de l'enfant",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: Color(0xFF063D66)),
+              title: const Text("Importer une photo"),
+              onTap: () => _handlePhotoSelection(child, ctrl, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Color(0xFF063D66)),
+              title: const Text("Prendre une photo"),
+              onTap: () => _handlePhotoSelection(child, ctrl, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handlePhotoSelection(
+      ChildModel child,
+      ChildrenController ctrl,
+      ImageSource source,
+      ) {
+    // Ferme le bottomsheet d'abord
+    Navigator.of(Get.context!).pop();
+
+    // Attend que le bottomsheet soit complètement fermé
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 400));
+      if (child.id != null) {
+        await ctrl.updateChildPhoto(child.id!, source);
+      }
+    });
   }
 }
 
