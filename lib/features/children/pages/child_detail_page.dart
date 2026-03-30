@@ -26,6 +26,8 @@ class ChildDetailPage extends StatelessWidget {
         ) ??
             initialChild;
 
+        print("Etablissement: ${child.extras["school_id"]}");
+
         final bool hasInscription = child.extras["school_id"] != null &&
             child.extras["school_id"]!.isNotEmpty;
 
@@ -230,7 +232,7 @@ class ChildDetailPage extends StatelessWidget {
                           ? [
                         _InfoRow(
                           label: "Établissement",
-                          value: child.displaySchool,
+                          value: child.schoolName!,
                         ),
                         _InfoRow(
                           label: "Niveau",
@@ -351,8 +353,11 @@ class ChildDetailPage extends StatelessWidget {
               title: const Text("Prendre une photo"),
               onTap: () async {
                 Get.back();
-                await ctrl.updateChildPhoto(
-                    child.id!, ImageSource.camera);
+                if (child.id != null) {
+                  await ctrl.updateChildPhoto(child.id!, ImageSource.camera);
+                } else {
+                  Get.snackbar("Erreur", "ID enfant introuvable");
+                }
               },
             ),
           ],

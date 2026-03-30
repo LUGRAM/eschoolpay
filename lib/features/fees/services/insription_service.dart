@@ -9,6 +9,7 @@ class InscriptionService {
     required int ecoleId,
     required double frais,
   }) async {
+
     final body = {
       "eleve_id": eleveId,
       "niveau_id": levelId,
@@ -17,16 +18,24 @@ class InscriptionService {
       "date_inscription": DateTime.now().toIso8601String(),
       "frais_inscription": frais,
     };
-    print(body);
 
     final response = await ApiClient.post("/inscriptions", body);
 
-    print(response.body);
+    final data = jsonDecode(response.body);
 
+    print(data);
+
+    // 🔥 Gestion propre des erreurs métier
     if (response.statusCode != 201 && response.statusCode != 200) {
+
+      // Si message venant du backend
+      if (data is Map && data.containsKey('message')) {
+        throw Exception(data['message']); // 👈 message clair
+      }
+
       throw Exception("Erreur inscription (${response.statusCode})");
     }
 
-    return jsonDecode(response.body);
+    return data;
   }
 }

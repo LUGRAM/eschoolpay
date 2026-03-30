@@ -41,13 +41,24 @@ class ChildModel {
     final apiDate = (json['date_naissance'] ?? '').toString();
     final uiDate = _toUiDate(apiDate);
 
-    // L'API retourne "photo" qui peut être null ou une URL complète
     const _baseStorageUrl = 'https://eschool.itmaster-africa.com/storage/';
 
     final rawPhoto = json['photo']?.toString();
     final photoUrl = (rawPhoto != null && rawPhoto.isNotEmpty)
         ? (rawPhoto.startsWith('http') ? rawPhoto : '$_baseStorageUrl$rawPhoto')
         : null;
+
+    final inscriptions = (json['inscriptions'] as List?) ?? [];
+
+    Map<String, dynamic>? lastInscription;
+
+    if (inscriptions.isNotEmpty) {
+      lastInscription = inscriptions.last;
+    }
+
+    final niveau = lastInscription?['niveau'];
+    final annee = lastInscription?['annee_scolaire'];
+    final ecole = lastInscription?['ecole'];
 
     return ChildModel(
       id: (json['id'] ?? '').toString(),
@@ -57,19 +68,28 @@ class ChildModel {
       birthPlace: (json['lieu_naissance'] ?? '').toString(),
       sexe: (json['sexe'] ?? 'M').toString(),
       matricule: (json['matricule'] ?? '').toString(),
+
       parentId: int.tryParse(
-          (json['parent_model_id'] ??
-              json['parentProfile']?['id'] ??
-              0)
-              .toString()) ??
+        (json['parent_profile_id'] ??
+            json['parent']?['id'] ??
+            0)
+            .toString(),
+      ) ??
           0,
+
       photoUrl: photoUrl,
+
       extras: {
-        "school_id": (json['school_id'] ?? '').toString(),
-        "grade": (json['grade'] ?? '').toString(),
-        "academic_year": (json['academic_year'] ?? '').toString(),
-        "school_name": (json['school_name'] ?? '').toString(),
-        "niveau_id": (json['niveau_id'] ?? '').toString(),
+        "school_id": (lastInscription?['ecole_id'] ?? '').toString(),
+
+        // Pas encore dans l’API → fallback
+        "school_name": (ecole?['nom'] ?? '').toString(),
+
+        "niveau_id": (niveau?['id'] ?? '').toString(),
+        "grade": (niveau?['nom'] ?? '').toString(),
+
+        "academic_year":
+        (annee?['annee_scolaire'] ?? '').toString(),
       },
     );
   }

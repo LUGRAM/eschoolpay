@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:bantuschoolpay/features/fees/pages/payment_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -337,25 +339,71 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
           ),
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
 
-        // ── 4️⃣ CARTE FRAIS D'INSCRIPTION ───────────────────────
-        // 🔧 UI restaurée — logique à brancher (selectedFee / totalAmount)
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.grey.withValues(alpha: 0.2),
-              width: 2,
+        const Text(
+          "Statut de l'inscription",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+
+        const SizedBox(height: 8),
+
+        Obx(() => Column(
+          children: [
+
+            CheckboxListTile(
+              value: regCtrl.isAlreadyRegistered.value == true,
+              onChanged: (value) {
+                regCtrl.isAlreadyRegistered.value = true;
+              },
+              title: const Text("Déjà inscrit"),
+              controlAffinity: ListTileControlAffinity.leading,
             ),
-          ),
-          child: Obx(() {
-            final fee = schoolsCtrl.inscriptionFee.value;
 
-            return Row(
+            CheckboxListTile(
+              value: regCtrl.isAlreadyRegistered.value == false,
+              onChanged: (value) {
+                regCtrl.isAlreadyRegistered.value = false;
+              },
+              title: const Text("Non inscrit"),
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+
+          ],
+        )),
+
+        const SizedBox(height: 10,),
+        Obx(() {
+          final isRegistered = regCtrl.isAlreadyRegistered.value;
+
+          if (isRegistered) {
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                "Aucun frais requis (déjà inscrit)",
+                style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600),
+              ),
+            );
+          }
+
+          final fee = schoolsCtrl.inscriptionFee.value;
+
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.grey.withValues(alpha: 0.2),
+                width: 2,
+              ),
+            ),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
@@ -371,10 +419,9 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
                   ),
                 ),
               ],
-            );
-          }),
-        ),
-
+            ),
+          );
+        }),
         const SizedBox(height: 30),
 
         // ── 5️⃣ BOUTON SUIVANT ───────────────────────────────────
@@ -445,11 +492,19 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
 
               const Divider(height: 30),
 
-              _row(
-                "Montant payé",
-                "$amount FCFA",
-                bold: true,
-              ),
+              Obx(() {
+                final isRegistered = regCtrl.isAlreadyRegistered.value;
+
+                if (isRegistered) {
+                  return const SizedBox.shrink();
+                }
+
+                return _row(
+                  "Montant à payer",
+                  "$amount FCFA",
+                  bold: true,
+                );
+              }),
             ],
           ),
         ),
@@ -460,50 +515,54 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () => setState(() => step = 1),
+                onPressed: () => setState(() => step = 0),
                 child: const Text("Modifier paiement"),
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
-              child: GradientButton(
-                label: "Procéder au paiement",
-                onTap: () {
+            Obx(() {
+              final isRegistered = regCtrl.isAlreadyRegistered.value;
 
-                  final amount =
-                  schoolsCtrl.inscriptionFee.value.toInt();
+              if(isRegistered){
+                return Expanded(
+                  child: GradientButton(
+                    label: "Confirmer l'inscription",
+                    onTap: () async {
 
-                  Get.to(
-                        () => const PaymentPage(),
-                    arguments: {
-                      "amount": amount,
-                      "context": "inscription",
+                      await regCtrl.confirmRegistration();
+
+                      Get.snackbar(
+                        "Succès",
+                        "Inscription confirmée",
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+
+                      Get.offNamed(Routes.home);
+
                     },
-                  );
-                },
-              ),
-            )
-            // Expanded(
-            //   child: GradientButton(
-            //     label: regCtrl.isLoading.value
-            //         ? "Validation..."
-            //         : "Confirmer l'inscription",
-            //     onTap: regCtrl.isLoading.value
-            //         ? null
-            //         : () async {
-            //
-            //       await regCtrl.confirmRegistration();
-            //
-            //       Get.snackbar(
-            //         "Succès",
-            //         "Inscription enregistrée",
-            //         snackPosition: SnackPosition.BOTTOM,
-            //       );
-            //
-            //       Get.offNamed(Routes.home);
-            //     },
-            //   ),
-            // ),
+                  ),
+                );
+              }else{
+                return Expanded(
+                  child: GradientButton(
+                    label: "Procéder au paiement",
+                    onTap: () async {
+
+                      final amount = schoolsCtrl.inscriptionFee.value.toInt();
+
+                      Get.to(
+                            () => const PaymentPage(),
+                        arguments: {
+                          "amount": amount,
+                          "context": "inscription",
+                        },
+                      );
+
+                    },
+                  ),
+                );
+              }
+            })
           ],
         ),
       ],
