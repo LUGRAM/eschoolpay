@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../app/controllers/annee_scolaire_controller.dart';
 import '../../../app/router/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/gradient_button.dart';
@@ -18,6 +19,12 @@ class CantineStartPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final feesCtrl = Get.find<FeesController>();
     final childrenCtrl = Get.find<ChildrenController>();
+    final controller = Get.find<AnneeScolaireController>();
+
+    final selected = controller.selectedYear.value;
+    final normalizedSelected = selected == null
+        ? null
+        : controller.schoolYears.firstWhereOrNull((e) => e.id == selected.id);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Cantine scolaire")),
@@ -108,13 +115,14 @@ class CantineStartPage extends StatelessWidget {
                           if (val?.id != null) {
                             print(val?.id);
                             print(val?.matricule);
+                            print(normalizedSelected?.id);
 
                             // Récupère en tant qu'entier
                             final yearId = prefs.getInt('selected_year_id') ?? 0;  // 0 = fallback safe
 
                             feesCtrl.selectChild(
                                 val!,
-                                yearId.toString(),               // convertit en string seulement ici
+                                normalizedSelected!.id.toString(),               // convertit en string seulement ici
                                 "CANTINE"
                             );
                           }

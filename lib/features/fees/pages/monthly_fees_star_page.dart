@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../app/controllers/annee_scolaire_controller.dart';
 import '../../../app/router/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/gradient_button.dart';
@@ -16,6 +17,14 @@ class MonthlyFeesStartPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final feesCtrl = Get.find<FeesController>();
     final childrenCtrl = Get.find<ChildrenController>();
+    final controller = Get.find<AnneeScolaireController>();
+
+    final selected = controller.selectedYear.value;
+    final normalizedSelected = selected == null
+        ? null
+        : controller.schoolYears.firstWhereOrNull((e) => e.id == selected.id);
+
+    print("Affichage de l'annee scolaire: ${normalizedSelected?.id}");
 
     return Scaffold(
       appBar: AppBar(title: const Text("Frais de scolarité")),
@@ -78,8 +87,8 @@ class MonthlyFeesStartPage extends StatelessWidget {
                             if (child?.id != null) {
                               print(child?.id);
                               print(child?.matricule);
-                              print(prefs.get('selected_year_id'));
-                              feesCtrl.selectChild(child!, prefs.get('selected_year_id').toString(), "MENSUEL");
+                              print(normalizedSelected?.id);
+                              feesCtrl.selectChild(child!, normalizedSelected!.id.toString(), "MENSUEL");
                             }
                           },
                         ),

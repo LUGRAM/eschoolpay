@@ -77,4 +77,5 @@ class SchoolsController extends GetxController {
 
     inscriptionFee.value = double.tryParse(data["montant"].toString()) ?? 0;
   }
+
 }

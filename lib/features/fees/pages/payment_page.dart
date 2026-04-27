@@ -224,7 +224,7 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   // ─── INSCRIPTION ─────────────────────────────────────────────
-  Future<void> _handleInscriptionPayment() async {
+  /*Future<void> _handleInscriptionPayment() async {
     final regCtrl = Get.find<RegistrationController>();
     final child = regCtrl.selectedChild.value;
     final amount = Get.arguments?['amount'] ?? 0;
@@ -271,6 +271,100 @@ class _PaymentPageState extends State<PaymentPage> {
       'amount': amount,
       'method': method,
       'date': DateTime.now(),
+    });
+  }
+*/
+  Future<void> _handleInscriptionPayment() async {
+    final regCtrl = Get.find<RegistrationController>();
+    final child = regCtrl.selectedChild.value!;
+    final int amount = Get.arguments?['amount'] ?? 0;
+    final int inscriptionFraisId = Get.arguments?['frais_id'] ?? 0;
+
+    final String schoolName = regCtrl.schoolsCtrl.selectedSchool.value?.name ?? '';
+    final String grade = regCtrl.schoolsCtrl.selectedLevel.value?.name ?? '';
+    final int anneeId = regCtrl.anneeCtrl.selectedYear.value!.id;
+
+    // ── 1. Enregistrement de l'inscription ──────────────────────
+    try {
+      await regCtrl.confirmRegistration();
+    } catch (e) {
+      _stopLoading();
+      Get.snackbar("Erreur", "Impossible d'enregistrer l'inscription.");
+      return;
+    }
+
+    // ── 2. Lancement du paiement mobile ─────────────────────────
+    final service = PaymentService();
+
+    final response = await service.payerFrais(
+      eleveId: int.parse(child.id.toString()),
+      anneeId: anneeId,
+      fraisId: inscriptionFraisId,
+      montant: amount.toDouble(),
+      methode: method,
+      telephone: phoneCtrl.text,
+    );
+
+    debugPrint("Réponse initiale inscription: $response");
+
+    // ── 3. Vérification initialisation ──────────────────────────
+    if (response['status'] != true || response['statut'] != "PENDING") {
+      _stopLoading();
+      _navigateToResult('FAILED', child.fullName, 'Inscription scolaire', amount);
+      return;
+    }
+
+    // ── 4. Polling ───────────────────────────────────────────────
+    final reference = response['reference'].toString();
+    int attempts = 0;
+
+    _paymentTimer?.cancel();
+    _paymentTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      attempts++;
+
+      final result = await service.check(reference);
+      final String? status = result['status']?.toString();
+
+      debugPrint("Check inscription [$attempts/$_maxAttempts]: $status");
+
+      if (status == 'PAYED') {
+        timer.cancel();
+
+        _addToHistory(PaymentHistory(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          childId: child.id ?? '',
+          childName: child.fullName,
+          service: PaymentServiceType.inscription,
+          amount: amount,
+          date: DateTime.now(),
+          method: method,
+          status: PaymentStatus.success,
+          schoolName: schoolName,
+          grade: grade,
+        ));
+
+        _stopLoading();
+        _navigateToResult('SUCCESS', child.fullName, 'Inscription scolaire', amount);
+        return;
+      }
+
+      if (status == 'FAILED') {
+        timer.cancel();
+        _stopLoading();
+        _navigateToResult('FAILED', child.fullName, 'Inscription scolaire', amount);
+        return;
+      }
+
+      if (attempts >= _maxAttempts) {
+        timer.cancel();
+        _stopLoading();
+        Get.snackbar(
+          "Paiement en attente",
+          "La confirmation prend trop de temps. Vérifiez votre téléphone.",
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 6),
+        );
+      }
     });
   }
 

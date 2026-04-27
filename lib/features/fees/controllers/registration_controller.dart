@@ -46,6 +46,9 @@ class RegistrationController extends GetxController {
             : schoolsCtrl.inscriptionFee.value, // logique ajoutée
       );
 
+      print("◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘Affichage de l'annee scolaire: ${annee.annee_scolaire}  ◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘");
+
+
       // SUCCESS
       final data = result['data'] ?? result;
 
