@@ -555,6 +555,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
                         arguments: {
                           "amount": amount,
                           "context": "inscription",
+
                         },
                       );
 

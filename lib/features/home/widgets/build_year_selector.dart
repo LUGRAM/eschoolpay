@@ -52,6 +52,8 @@ Widget buildYearSelector({
           ? null
           : controller.schoolYears.firstWhereOrNull((e) => e.id == selected.id);
 
+      print("Affichage de l'annee scolaire: ${normalizedSelected?.id}");
+
       return Theme(
         // ✅ améliore le rendu menu (rayon, fond)
         data: Theme.of(Get.context!).copyWith(
