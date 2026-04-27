@@ -70,6 +70,9 @@ class ApiClient {
     required String type
   }) async {
 
+    print("Data sent to back");
+    print('$childId $type $yearId');
+
     final uri = Uri.parse("$baseUrl/frais-scolaires").replace(
       queryParameters: {
         "child_id": childId,
@@ -106,6 +109,24 @@ class ApiClient {
     );
 
     return response;
+  }
+
+  static Future<bool> deleteAccount() async {
+    final response = await http.delete(
+      Uri.parse("$baseUrl/delete-account"),
+      headers: {
+        "Authorization": "Bearer $_token",
+        "Accept": "application/json",
+      },
+    );
+
+    print(response.body);
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   // ================= POST =================

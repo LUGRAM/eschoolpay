@@ -25,7 +25,7 @@ class _FAQPageState extends State<FAQPage> {
         _FAQItem(
           question: "Quels modes de paiement sont acceptés ?",
           answer:
-          "E-SCHOOLPAY accepte les paiements via Airtel Money (07x) et Moov Money (06x). Le paiement en espèces au guichet de l'école est également disponible avec confirmation manuelle.",
+          "BANTU SCHOOLPAY accepte les paiements via Airtel Money (07x) et Moov Money (06x). Le paiement en espèces au guichet de l'école est également disponible avec confirmation manuelle.",
         ),
         _FAQItem(
           question: "Mon paiement a échoué mais j'ai été débité ?",
@@ -79,7 +79,7 @@ class _FAQPageState extends State<FAQPage> {
         _FAQItem(
           question: "Puis-je gérer plusieurs enfants ?",
           answer:
-          "Oui, E-SCHOOLPAY permet de gérer plusieurs enfants depuis un seul compte parent. Chaque enfant a son propre profil, historique et suivi d'inscription.",
+          "Oui, BANTU SCHOOLPAY permet de gérer plusieurs enfants depuis un seul compte parent. Chaque enfant a son propre profil, historique et suivi d'inscription.",
         ),
         _FAQItem(
           question: "Comment modifier la photo de mon enfant ?",

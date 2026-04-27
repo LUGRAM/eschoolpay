@@ -1,4 +1,4 @@
-package com.itmasterafrica.bantuschoolpay
+package com.itmasterafrica.bantuschoolpays
 
 import io.flutter.embedding.android.FlutterActivity
 

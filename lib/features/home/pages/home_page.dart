@@ -63,18 +63,18 @@ class _ESchoolHomePageState extends State<ESchoolHomePage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F9),
-      drawer: const AppDrawer(),
+      // drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
 // On utilise un Builder pour que le bouton menu puisse trouver le Scaffold
-        leading: Builder(
-          builder: (context) =>
-              IconButton(
-                icon: Icon(Icons.menu, color: primaryBlue),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-              ),
-        ),
+//         leading: Builder(
+//           builder: (context) =>
+//               IconButton(
+//                 icon: Icon(Icons.menu, color: primaryBlue),
+//                 onPressed: () => Scaffold.of(context).openDrawer(),
+//               ),
+//         ),
         title: Text(
             "Bantu SchoolPay",
             style: TextStyle(

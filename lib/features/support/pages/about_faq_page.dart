@@ -79,7 +79,7 @@ class AboutFaqPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 14),
                           const Text(
-                            "E-SCHOOLPAY",
+                            "BANTU SCHOOLPAY",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -136,7 +136,7 @@ class AboutFaqPage extends StatelessWidget {
                     icon: Icons.flag_rounded,
                     color: _primaryBlue,
                     child: const Text(
-                      "E-SCHOOLPAY simplifie le paiement des frais scolaires pour les parents gabonais. Notre plateforme connecte les familles aux établissements scolaires pour une gestion transparente et sécurisée des inscriptions, mensualités, cantine et transport.",
+                      "BANTU SCHOOLPAY simplifie le paiement des frais scolaires pour les parents gabonais. Notre plateforme connecte les familles aux établissements scolaires pour une gestion transparente et sécurisée des inscriptions, mensualités, cantine et transport.",
                       style: TextStyle(
                           fontSize: 13,
                           color: Color(0xFF555566),
@@ -189,7 +189,7 @@ class AboutFaqPage extends StatelessWidget {
                     color: const Color(0xFF388E3C),
                     onTap: () async {
                       await Share.share(
-                        "Télécharge E-SCHOOLPAY pour payer les frais scolaires en un clic ! https://eschoolpay.ga",
+                        "Télécharge BANTU SCHOOLPAY pour payer les frais scolaires en un clic ! https://bantu-schoolpay.com",
                         subject: "Paiement scolaire simplifié",
                       );
                     },
@@ -210,7 +210,7 @@ class AboutFaqPage extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          "© 2026 E-SCHOOLPAY · IT-MASTER AFRICA",
+                          "© 2026 BANTU SCHOOLPAY · IT-MASTER AFRICA",
                           style: TextStyle(
                               fontSize: 11,
                               color: Colors.grey.shade400,
@@ -592,7 +592,7 @@ class _ContactCard extends StatelessWidget {
               icon: Icons.mail_rounded,
               color: const Color(0xFF063D66),
               label: "Email",
-              value: "support@eschoolpay.ga"),
+              value: "support@bantu-schoolpay.com"),
           const Divider(height: 16),
           _ContactRow(
               icon: Icons.phone_rounded,
@@ -604,7 +604,7 @@ class _ContactCard extends StatelessWidget {
               icon: Icons.language_rounded,
               color: const Color(0xFF1976D2),
               label: "Site web",
-              value: "eschoolpay.ga"),
+              value: "bantu-schoolpay.com"),
         ],
       ),
     );

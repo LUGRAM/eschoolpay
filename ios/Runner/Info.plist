@@ -7,15 +7,21 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Bantuschoolpay</string>
+	<string>BantuPaySchool</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>MinimumOSVersion</key>
+	<string>13.0</string>
 	<key>CFBundleName</key>
-	<string>bantuschoolpay</string>
+	<string>bantupayschool</string>
+	<key>NSCameraUsageDescription</key>
+	<string>BantuPaySchool utilise votre caméra pour capturer des photos de profil et numériser des reçus de paiement scolaire afin de les joindre à vos transactions.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>L’accès à la galerie est requis pour vous permettre de sélectionner et envoyer des images, notamment pour compléter votre profil ou vos documents.</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -24,10 +30,6 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
-	<key>NSCameraUsageDescription</key>
-    <string>Cette application a besoin d'accéder à la caméra pour prendre une photo.</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>Cette application a besoin d'accéder à la galerie.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

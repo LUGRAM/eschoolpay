@@ -143,8 +143,6 @@ class FeesController extends GetxController {
 
       isLoadingFrais.value = true;
 
-      print("Data sent to back");
-
       final result = await ApiClient.getFraisScolaire(
         childId: childId,
         yearId: yearId,
@@ -152,7 +150,6 @@ class FeesController extends GetxController {
       );
 
       fraisScolaires.value = result;
-      print(fraisScolaires);
 
     } catch (e) {
       print("Erreur chargement frais scolaires: $e");

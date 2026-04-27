@@ -27,7 +27,7 @@ class PaymentService {
     );
 
     return jsonDecode(response.body);
-  }
+  } 
 
   Future<Map<String, dynamic>> check(String reference) async {
     print("================Statut=================");

@@ -115,7 +115,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                     icon: Icons.folder_open_rounded,
                     content: [
                       _Paragraph(
-                        "Nous collectons les informations que vous nous fournissez directement lors de l'utilisation de l'application E-SCHOOLPAY :",
+                        "Nous collectons les informations que vous nous fournissez directement lors de l'utilisation de l'application BANTU SCHOOLPAY :",
                       ),
                       _BulletList(items: [
                         "Informations d'identification : nom, prénom, numéro de téléphone, adresse e-mail",
@@ -124,7 +124,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                         "Données de connexion : token d'authentification, identifiant de session",
                       ]),
                       _Paragraph(
-                        "Ces données sont collectées uniquement dans le but de vous fournir les services de paiement scolaire proposés par E-SCHOOLPAY.",
+                        "Ces données sont collectées uniquement dans le but de vous fournir les services de paiement scolaire proposés par BANTU SCHOOLPAY.",
                       ),
                     ],
                   ),
@@ -192,7 +192,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                     icon: Icons.child_care_rounded,
                     content: [
                       _Paragraph(
-                        "E-SCHOOLPAY accorde une attention particulière à la protection des données relatives aux enfants :",
+                        "BANTU SCHOOLPAY accorde une attention particulière à la protection des données relatives aux enfants :",
                       ),
                       _BulletList(items: [
                         "Les données des enfants ne sont accessibles qu'au parent ou tuteur légal titulaire du compte",
@@ -281,7 +281,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                         "Nous nous réservons le droit de modifier cette politique à tout moment. En cas de changement significatif, vous serez notifié via l'application. La date de dernière mise à jour est indiquée en haut de cette page.",
                       ),
                       _Paragraph(
-                        "En continuant à utiliser E-SCHOOLPAY après une modification, vous acceptez la nouvelle politique de confidentialité.",
+                        "En continuant à utiliser BANTU SCHOOLPAY après une modification, vous acceptez la nouvelle politique de confidentialité.",
                       ),
                     ],
                   ),
@@ -323,7 +323,7 @@ class _IntroCard extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              "Bienvenue sur E-SCHOOLPAY. Cette politique décrit comment nous collectons, utilisons et protégeons vos informations personnelles. En utilisant notre application, vous acceptez les pratiques décrites ci-dessous.",
+              "Bienvenue sur BANTU SCHOOLPAY. Cette politique décrit comment nous collectons, utilisons et protégeons vos informations personnelles. En utilisant notre application, vous acceptez les pratiques décrites ci-dessous.",
               style: TextStyle(
                 fontSize: 13,
                 color: Colors.grey.shade700,
@@ -515,7 +515,7 @@ class _ContactCard extends StatelessWidget {
           _ContactRow(
             icon: Icons.mail_rounded,
             label: "Email",
-            value: "support@eschoolpay.ga",
+            value: "support@bantu-schoolpay.com",
           ),
           const Divider(height: 16),
           _ContactRow(
@@ -609,7 +609,7 @@ class _FooterCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            "E-SCHOOLPAY s'engage à protéger vos données\npersonnelles et celles de vos enfants.",
+            "BANTU SCHOOLPAY s'engage à protéger vos données\npersonnelles et celles de vos enfants.",
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.85),
               fontSize: 12,
