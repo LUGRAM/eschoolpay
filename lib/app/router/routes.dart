@@ -18,6 +18,8 @@ abstract class Routes {
   static const monthlyFeesStart = '/fees/monthlyFees';
   static const cantineStart = '/fees/cantine';
   static const transportStart = '/fees/transport';
+  static const coursStart = '/fees/cours';
+  static const exerciceStart = '/fees/exercice';
   static const payment = '/payment';
   static const childPaymentHistory  = '/fees/history';
   static const editSheet = '/editq';
