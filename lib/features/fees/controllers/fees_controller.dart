@@ -10,7 +10,7 @@ import '../data/mock_cantine_options.dart';
 import '../models/payment_record_model.dart';
 import '../models/transport_option_model.dart';
 
-enum ServiceType { inscription, mensualite, cantine, transport }
+enum ServiceType { inscription, mensualite, cantine, transport, cours, exercice }
 
 class FeesController extends GetxController {
   final currentService = ServiceType.inscription.obs;

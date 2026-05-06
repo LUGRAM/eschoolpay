@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 // Importations des Pages et Controllers
 import '../../features/auth/pages/phone_signin_page.dart';
 import '../../features/children/bindings/children_binding.dart';
+import '../../features/cours/pages/cours_detail_page.dart';
+import '../../features/cours/pages/lesson_player_page.dart';
 import '../../features/fees/bindings/fees_binding.dart';
 import '../../features/fees/pages/cantine_start_page.dart';
 import '../../features/fees/pages/payment_page.dart';
@@ -25,6 +27,8 @@ import '../../features/fees/pages/fees_success_page.dart';
 import '../../features/onboarding/controllers/onboarding_controller.dart';
 import '../../features/history/pages/payment_detail_page.dart';
 
+import '../../features/cours/pages/cours_start_page.dart';
+import '../../features/exercices/pages/exercice_start_page.dart';
 
 // 1. DÉFINITION DES NOMS DE ROUTES
 import 'package:bantuschoolpay/app/router/routes.dart';
@@ -110,6 +114,12 @@ class AppPages {
       page: () => const TransportStartPage(),
       binding: FeesBinding(),
     ),
+
+
+    GetPage(name: '/fees/cours',     page: () => CoursStartPage()),
+    GetPage(name: '/fees/exercice',  page: () => ExerciceStartPage()),
+
+
     GetPage(
       name: Routes.payment,
       page: () => const PaymentPage(),
@@ -125,30 +135,9 @@ class AppPages {
     ),
 
 
-    /*
-    GetPage(
-      name: Routes.feesPreview,
-      page: () => const FeesPreviewPage(),
-      binding: FeesBinding(),
-    ),
-    GetPage(
-      name: Routes.childPaymentsHistory,
-      page: () => const ChildPaymentsHistoryPage(),
-      binding: FeesBinding(),
-    GetPage(
-      name: Routes.paymentRegistration,
-      page: () => const PaymentRegistrationPage(),
-      binding: FeesBinding(),
-    ),
-    GetPage(
-      name: Routes.paymentFees,
-      page: () => const PaymentFeesPage(),
-      binding: FeesBinding(),
-    ),
-    GetPage(
-      name: Routes.childPaymentsHistory,
-      page: () => const ChildPaymentsHistoryPage(),
-      binding: FeesBinding(),
-    ),*/
+
+    GetPage(name: '/course-detail', page: () => CourseDetailPage()),  // ← manquant ?
+    GetPage(name: '/lesson-player', page: () => LessonPlayerPage()),
+
   ];
 }

@@ -43,6 +43,18 @@ class ServicesMenuPage extends StatelessWidget {
               Colors.purple,
                   () => _navToService(feesCtrl, ServiceType.transport)
           ),
+          _menuCard(
+              "Cours",
+              Icons.school_rounded,
+              Colors.pink,
+                  () => _navToService(feesCtrl, ServiceType.cours)
+          ),
+          _menuCard(
+              "Exercices",
+              Icons.home_work,
+              Colors.blueGrey,
+                  () => _navToService(feesCtrl, ServiceType.exercice)
+          ),
         ],
       ),
     );
@@ -65,6 +77,12 @@ class ServicesMenuPage extends StatelessWidget {
         break;
       case ServiceType.transport:
         Get.toNamed(Routes.transportStart); // ✅ Route transport (à créer)
+        break;
+      case ServiceType.cours:
+        Get.toNamed(Routes.coursStart); // ✅ Route cours
+        break;
+      case ServiceType.exercice:
+        Get.toNamed(Routes.exerciceStart); // ✅ Route exercice)
         break;
     }
   }
