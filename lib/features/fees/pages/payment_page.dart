@@ -5,14 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../../app/controllers/annee_scolaire_controller.dart';
 import '../../../app/router/routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/app_text_field.dart';
 import '../../../app/widgets/gradient_button.dart';
+import '../../children/controllers/children_controller.dart';
+import '../../children/models/child_model.dart';
 import '../../history/controllers/payment_history_controller.dart';
 import '../../history/models/payment_history_model.dart';
+import '../../schools/controllers/schools_controller.dart';
 import '../controllers/fees_controller.dart';
 import '../controllers/registration_controller.dart';
+import '../services/insription_service.dart';
 import '../services/payment_service.dart';
 
 enum PaymentContext { inscription, fees }
@@ -281,8 +286,17 @@ class _PaymentPageState extends State<PaymentPage> {
     final int inscriptionFraisId = Get.arguments?['frais_id'] ?? 0;
 
     final String schoolName = regCtrl.schoolsCtrl.selectedSchool.value?.name ?? '';
+    final String schoolId = regCtrl.schoolsCtrl.selectedSchool.value?.id ?? '';
     final String grade = regCtrl.schoolsCtrl.selectedLevel.value?.name ?? '';
     final int anneeId = regCtrl.anneeCtrl.selectedYear.value!.id;
+    final SchoolsController schoolsCtrl = Get.find();
+    final AnneeScolaireController anneeCtrl = Get.find();
+    final ChildrenController childrenCtrl = Get.find();
+
+    var isAlreadyRegistered = false.obs;
+    final school = schoolsCtrl.selectedSchool.value!;
+    final level = schoolsCtrl.selectedLevel.value!;
+    final annee = anneeCtrl.selectedYear.value!;
 
     // ── 1. Enregistrement de l'inscription ──────────────────────
     try {
@@ -294,35 +308,66 @@ class _PaymentPageState extends State<PaymentPage> {
     }
 
     // ── 2. Lancement du paiement mobile ─────────────────────────
-    final service = PaymentService();
+    final InscriptionService service = InscriptionService();
 
-    final response = await service.payerFrais(
-      eleveId: int.parse(child.id.toString()),
+    // final response = await service.payerFrais(
+    //   eleveId: int.parse(child.id.toString()),
+    //   anneeId: anneeId,
+    //   fraisId: inscriptionFraisId,
+    //   montant: amount.toDouble(),
+    //   methode: method,
+    //   telephone: phoneCtrl.text,
+    // );
+
+    final result = await service.createInscription(
+      eleveId: int.parse(child.id!),
+      levelId: int.parse(level.id.toString()),
       anneeId: anneeId,
-      fraisId: inscriptionFraisId,
-      montant: amount.toDouble(),
-      methode: method,
+      ecoleId: int.parse(schoolId.toString()),
       telephone: phoneCtrl.text,
+      methode: method,
+      frais: isAlreadyRegistered.value
+          ? 0
+          : amount.toDouble(), // logique ajoutée
     );
 
-    debugPrint("Réponse initiale inscription: $response");
+    print("◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘Affichage de l'annee scolaire: ${annee.annee_scolaire}  ◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘◘");
+
+
+    // SUCCESS
+    final data = result['data'] ?? result;
+
+    final updatedExtras = {
+      ...child.extras,
+      "school_id": (data['ecole']?['id'] ?? schoolId).toString(),
+      "school_name": (data['ecole']?['nom'] ?? schoolName).toString(),
+      "grade": (data['niveau']?['nom'] ?? level.name).toString(),
+      "niveau_id": (data['niveau']?['id'] ?? level.id).toString(),
+      "academic_year": anneeId.toString() ?? "",
+    };
+
+    childrenCtrl.updateChildExtras(child.id!, updatedExtras);
+
+    debugPrint("Réponse initiale inscription: $result");
 
     // ── 3. Vérification initialisation ──────────────────────────
-    if (response['status'] != true || response['statut'] != "PENDING") {
+    if (result['status'] != true || result['statut'] != "PENDING") {
       _stopLoading();
       _navigateToResult('FAILED', child.fullName, 'Inscription scolaire', amount);
       return;
     }
 
     // ── 4. Polling ───────────────────────────────────────────────
-    final reference = response['reference'].toString();
+    final reference = result['reference'].toString();
     int attempts = 0;
+
+    final servicePay = PaymentService();
 
     _paymentTimer?.cancel();
     _paymentTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
       attempts++;
 
-      final result = await service.check(reference);
+      final result = await servicePay.check(reference);
       final String? status = result['status']?.toString();
 
       debugPrint("Check inscription [$attempts/$_maxAttempts]: $status");

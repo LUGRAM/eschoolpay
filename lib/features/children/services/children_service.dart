@@ -20,6 +20,22 @@ class ChildrenService {
     throw Exception("Erreur chargement enfants (${response.statusCode})");
   }
 
+  Future<List<ChildModel>> fetchNonPaidChildren() async {
+    final response = await ApiClient.get("/eleves-non-inscrit");
+
+    print("======= ENFANTS =======");
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+      final List list = decoded is List ? decoded : decoded['data'];
+      return list.map((e) => ChildModel.fromApi(e)).toList();
+    }
+
+    throw Exception("Erreur chargement enfants (${response.statusCode})");
+  }
+
   Future<Map<String, dynamic>> createChild({
     required Map<String, String> fields,
     File? photo,

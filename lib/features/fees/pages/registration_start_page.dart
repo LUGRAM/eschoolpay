@@ -160,7 +160,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
         const SizedBox(height: 8),
 
         Obx(() {
-          if (childrenCtrl.children.isEmpty) {
+          if (childrenCtrl.childrenNonInscrit.isEmpty) {
             return const Text(
               "Aucun enfant ajouté. Veuillez d'abord ajouter un enfant.",
               style: TextStyle(color: Colors.grey, fontSize: 14),
@@ -175,7 +175,7 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
               EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
             hint: const Text("Sélectionnez un enfant"),
-            items: childrenCtrl.children.map((child) {
+            items: childrenCtrl.childrenNonInscrit.map((child) {
               return DropdownMenuItem(
                 value: child,
                 child: Text(child.fullName),
@@ -192,34 +192,34 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
         // Alerte enfant déjà inscrit
         Obx(() {
           final child = regCtrl.selectedChild.value;
-          if (child != null && child.isAlreadyRegisteredThisYear) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.warning_amber_rounded,
-                      color: Colors.red, size: 20),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      "Cet enfant est déjà inscrit pour l'année scolaire en cours.",
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
+          // if (child != null && child.isAlreadyRegisteredThisYear) {
+          //   return Container(
+          //     margin: const EdgeInsets.only(bottom: 12),
+          //     padding: const EdgeInsets.all(12),
+          //     decoration: BoxDecoration(
+          //       color: Colors.red.withValues(alpha: 0.1),
+          //       borderRadius: BorderRadius.circular(8),
+          //       border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+          //     ),
+          //     child: const Row(
+          //       children: [
+          //         Icon(Icons.warning_amber_rounded,
+          //             color: Colors.red, size: 20),
+          //         SizedBox(width: 8),
+          //         Expanded(
+          //           child: Text(
+          //             "Cet enfant est déjà inscrit pour l'année scolaire en cours.",
+          //             style: TextStyle(
+          //               color: Colors.red,
+          //               fontWeight: FontWeight.w600,
+          //               fontSize: 13,
+          //             ),
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   );
+          // }
           return const SizedBox.shrink();
         }),
 

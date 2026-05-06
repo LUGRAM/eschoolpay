@@ -68,7 +68,7 @@ class PaymentHistory {
       date: DateTime.tryParse(json['date_inscription'] ?? '') ??
           DateTime.tryParse(json['created_at'] ?? '') ??
           DateTime.now(),
-      method: 'N/A',
+      method:  json['methode']?.toString() ?? 'N/A',
       status: _parseStatut(json['statut']),
       schoolName: ecole['nom']?.toString() ?? '',
       grade: niveau['nom']?.toString() ?? '',

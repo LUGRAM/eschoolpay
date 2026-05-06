@@ -14,6 +14,7 @@ import '../services/children_service.dart';
 class ChildrenController extends GetxController {
   final ChildrenService _service = ChildrenService();
   final children = <ChildModel>[].obs;
+  final childrenNonInscrit = <ChildModel>[].obs;
   final isLoading = false.obs;
   final isUploadingPhoto = false.obs;
 
@@ -28,6 +29,7 @@ class ChildrenController extends GetxController {
     super.onInit();
     debugPrint('ChildrenController isLoggedIn: $isLoggedIn');
     if (isLoggedIn) fetchChildren();
+    if (isLoggedIn) fetchNonInscritChildren();
   }
 
   // ─── FETCH ───────────────────────────────────────────────────
@@ -37,6 +39,26 @@ class ChildrenController extends GetxController {
       isLoading.value = true;
       final result = await _service.fetchChildren();
       children.assignAll(result);
+    } catch (e) {
+      if (e.toString().contains("401")) {
+        Get.snackbar("Session expirée", "Veuillez vous reconnecter");
+      } else {
+        Get.snackbar("Erreur", "Impossible de charger les enfants");
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ─── FETCH ───────────────────────────────────────────────────
+  Future<void> fetchNonInscritChildren() async {
+    if (!isLoggedIn) return;
+    try {
+      isLoading.value = true;
+      final result = await _service.fetchNonPaidChildren();
+
+      print("Liste des eleves => $result");
+      childrenNonInscrit.assignAll(result);
     } catch (e) {
       if (e.toString().contains("401")) {
         Get.snackbar("Session expirée", "Veuillez vous reconnecter");
