@@ -82,7 +82,7 @@ class ServicesMenuPage extends StatelessWidget {
         Get.toNamed(Routes.coursStart); // ✅ Route cours
         break;
       case ServiceType.exercice:
-        Get.toNamed(Routes.exerciceStart); // ✅ Route exercice)
+        Get.toNamed(Routes.exercicesList);
         break;
     }
   }

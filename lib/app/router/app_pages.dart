@@ -29,6 +29,7 @@ import '../../features/history/pages/payment_detail_page.dart';
 
 import '../../features/cours/pages/cours_start_page.dart';
 import '../../features/exercices/pages/exercice_start_page.dart';
+import '../../features/exercices/pages/exercices_list_page.dart';
 
 // 1. DÉFINITION DES NOMS DE ROUTES
 import 'package:bantuschoolpay/app/router/routes.dart';
@@ -118,6 +119,7 @@ class AppPages {
 
     GetPage(name: '/fees/cours',     page: () => CoursStartPage()),
     GetPage(name: '/fees/exercice',  page: () => ExerciceStartPage()),
+    GetPage(name: Routes.exercicesList, page: () => const ExercicesListPage()),
 
 
     GetPage(
