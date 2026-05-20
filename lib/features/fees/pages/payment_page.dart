@@ -374,8 +374,10 @@ class _PaymentPageState extends State<PaymentPage> {
     final service = PaymentService();
 
     final child = feesCtrl.selectedChild.value!;
-    final frais = feesCtrl.selectedFraisScolaire.value != null ? feesCtrl.selectedFraisScolaire.value!
-        : (feesCtrl.selectedCantineOption.value ?? feesCtrl.selectedTransportOption.value) ;
+    final frais = feesCtrl.selectedFraisScolaire.value
+        ?? feesCtrl.selectedCantineOption.value
+        ?? feesCtrl.selectedTransportOption.value
+        ?? feesCtrl.selectedInformatiqueOption.value;
 
     //setState(() => _loadingLabel = "Envoi de la demande de paiement...");
 

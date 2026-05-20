@@ -10,7 +10,7 @@ import '../data/mock_cantine_options.dart';
 import '../models/payment_record_model.dart';
 import '../models/transport_option_model.dart';
 
-enum ServiceType { inscription, mensualite, cantine, transport, cours, exercice }
+enum ServiceType { inscription, mensualite, cantine, transport, cours, exercice, informatique }
 
 class FeesController extends GetxController {
   final currentService = ServiceType.inscription.obs;
@@ -22,6 +22,7 @@ class FeesController extends GetxController {
   final selectedFraisScolaire = Rxn<FraisScolaireModel>();
   final selectedCantineOption = Rxn<FraisScolaireModel>();
   final selectedTransportOption = Rxn<FraisScolaireModel>();
+  final selectedInformatiqueOption = Rxn<FraisScolaireModel>();
   final paymentMethod = 'Mobile Money'.obs;
 
   final type = RxString("");
@@ -100,6 +101,8 @@ class FeesController extends GetxController {
         return selectedCantineOption.value?.montant.toInt() ?? 0;
       case ServiceType.transport:
         return selectedTransportOption.value?.montant.toInt() ?? 0;
+      case ServiceType.informatique:
+        return selectedInformatiqueOption.value?.montant.toInt() ?? 0;
       default:
         return 0;
     }
@@ -119,6 +122,7 @@ class FeesController extends GetxController {
   RxList<FraisScolaireModel> fraisScolaires = <FraisScolaireModel>[].obs;
   RxList<FraisScolaireModel> fraisCantines = <FraisScolaireModel>[].obs;
   RxList<FraisScolaireModel> fraisTransports = <FraisScolaireModel>[].obs;
+  RxList<FraisScolaireModel> fraisInformatique = <FraisScolaireModel>[].obs;
 
   RxBool isLoadingFrais = false.obs;
 
@@ -133,6 +137,8 @@ class FeesController extends GetxController {
       await loadFraisScolaire(child.id!, schoolYearId.toString());
     } else if (type == "CANTINE") {
       await loadFraisCantinne(child.id!, schoolYearId.toString());
+    } else if (type == "INFORMATIQUE") {
+      await loadFraisInformatique(child.id!, schoolYearId.toString());
     } else {
       await loadFraisTrannsport(child.id!, schoolYearId.toString());
     }
@@ -207,6 +213,22 @@ class FeesController extends GetxController {
     }
   }
 
+  Future<void> loadFraisInformatique(String childId, String yearId) async {
+    try {
+      isLoadingFrais.value = true;
+      final result = await ApiClient.getFraisScolaire(
+        childId: childId,
+        yearId: yearId,
+        type: "INFORMATIQUE",
+      );
+      fraisInformatique.value = result;
+    } catch (e) {
+      print("Erreur chargement frais informatique: $e");
+    } finally {
+      isLoadingFrais.value = false;
+    }
+  }
+
   // ─────────────────────────────────────────────────────
   // MÉTHODE DE PAIEMENT
   // ─────────────────────────────────────────────────────
@@ -258,6 +280,8 @@ class FeesController extends GetxController {
     selectedFraisScolaire.value = null;
     selectedCantineOption.value = null;
     selectedTransportOption.value = null;
+    selectedInformatiqueOption.value = null;
+    fraisInformatique.clear();
     currentService.value = ServiceType.inscription;
     paymentMethod.value = 'Mobile Money';
   }

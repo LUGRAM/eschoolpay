@@ -20,6 +20,7 @@ abstract class Routes {
   static const transportStart = '/fees/transport';
   static const coursStart = '/fees/cours';
   static const exerciceStart = '/fees/exercice';
+  static const informatiqueStart = '/fees/informatique';
   static const exercicesList = '/exercices';
   static const payment = '/payment';
   static const childPaymentHistory  = '/fees/history';

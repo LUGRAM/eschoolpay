@@ -55,6 +55,12 @@ class ServicesMenuPage extends StatelessWidget {
               Colors.blueGrey,
                   () => _navToService(feesCtrl, ServiceType.exercice)
           ),
+          _menuCard(
+              "Exercices",
+              Icons.computer_rounded,
+              Colors.teal,
+                  () => _navToService(feesCtrl, ServiceType.informatique)
+          ),
         ],
       ),
     );
@@ -84,6 +90,9 @@ class ServicesMenuPage extends StatelessWidget {
       case ServiceType.exercice:
         Get.toNamed(Routes.exercicesList);
         break;
+      case ServiceType.informatique:
+        Get.toNamed(Routes.informatiqueStart);
+        break;  
     }
   }
 
