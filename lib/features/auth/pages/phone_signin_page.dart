@@ -217,12 +217,13 @@ class _PhoneSigninPageState extends State<PhoneSigninPage> {
     final fullPhone = _phoneCtrl.text.replaceAll(' ', '');
 
     try {
-      // ✅ Appel réel au controller (login)
+      // Appel réel au controller (login)
       // NOTE: ton backend login demande password.
       // Si tu veux "phone-only", il faut changer l’API en OTP / code.
       // Ici on redirige vers la page password/otp si tu en as une.
-      final ok = await _authCtrl.login(phone: fullPhone, password: ""); // ⚠️ à remplacer (OTP / password)
+      final ok = await _authCtrl.login(phone: fullPhone, password: ""); // à remplacer (OTP / password)
 
+      print(ok);
       if (ok) {
         Get.offAllNamed(Routes.home, arguments: {'phone': fullPhone});
       } else {

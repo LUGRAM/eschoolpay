@@ -43,18 +43,18 @@ class ServicesMenuPage extends StatelessWidget {
               Colors.purple,
                   () => _navToService(feesCtrl, ServiceType.transport)
           ),
-          _menuCard(
-              "Cours",
-              Icons.school_rounded,
-              Colors.pink,
-                  () => _navToService(feesCtrl, ServiceType.cours)
-          ),
-          _menuCard(
-              "Exercices",
-              Icons.home_work,
-              Colors.blueGrey,
-                  () => _navToService(feesCtrl, ServiceType.exercice)
-          ),
+          // _menuCard(
+          //     "Cours",
+          //     Icons.school_rounded,
+          //     Colors.pink,
+          //         () => _navToService(feesCtrl, ServiceType.cours)
+          // ),
+          // _menuCard(
+          //     "Exercices",
+          //     Icons.home_work,
+          //     Colors.blueGrey,
+          //         () => _navToService(feesCtrl, ServiceType.exercice)
+          // ),
         ],
       ),
     );

@@ -40,7 +40,7 @@ class CantineStartPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 1️⃣ ENFANT
+                      // 1️⃣ ENFANT
                     const Text(
                       "Enfant",
                       style:
@@ -79,6 +79,7 @@ class CantineStartPage extends StatelessWidget {
                       }
 
                       return DropdownButtonFormField<ChildModel>(
+                        isExpanded: true,
                         initialValue: feesCtrl.selectedChild.value,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
@@ -90,40 +91,30 @@ class CantineStartPage extends StatelessWidget {
                         hint: const Text("Sélectionnez un enfant"),
                         items: eligibleChildren
                             .map(
-                              (c) => DropdownMenuItem(
+                              (c) => DropdownMenuItem<ChildModel>(
                             value: c,
-                            child:
-                            Text(c.fullName),
+                            child: Text(
+                              c.fullName,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                         )
                             .toList(),
-                        /*onChanged: (val) async {
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          if (val?.id != null) {
-                            print(val?.id);
-                            print(val?.matricule);
-                            print(prefs.get('selected_year_id'));
-                            feesCtrl.selectChild(
-                                val!,
-                                "${prefs.getString('selected_year_id')}",
-                                "cantine"
-                            );
-                          }
-                        },*/
                         onChanged: (val) async {
                           SharedPreferences prefs = await SharedPreferences.getInstance();
+
                           if (val?.id != null) {
                             print(val?.id);
                             print(val?.matricule);
                             print(normalizedSelected?.id);
 
-                            // Récupère en tant qu'entier
-                            final yearId = prefs.getInt('selected_year_id') ?? 0;  // 0 = fallback safe
+                            final yearId = prefs.getInt('selected_year_id') ?? 0;
 
                             feesCtrl.selectChild(
-                                val!,
-                                normalizedSelected!.id.toString(),               // convertit en string seulement ici
-                                "CANTINE"
+                              val!,
+                              normalizedSelected!.id.toString(),
+                              "CANTINE",
                             );
                           }
                         },
