@@ -56,10 +56,10 @@ class ServicesMenuPage extends StatelessWidget {
                   () => _navToService(feesCtrl, ServiceType.exercice)
           ),
           _menuCard(
-              "Exercices",
+              "Informatique",
               Icons.computer_rounded,
               Colors.teal,
-                  () => _navToService(feesCtrl, ServiceType.informatique)
+              () => _navToService(feesCtrl, ServiceType.informatique),
           ),
         ],
       ),
