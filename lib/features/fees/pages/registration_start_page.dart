@@ -160,12 +160,12 @@ class _RegistrationStartPageState extends State<RegistrationStartPage> {
         const SizedBox(height: 8),
 
         Obx(() {
-          if (childrenCtrl.childrenNonInscrit.isEmpty) {
-            return const Text(
-              "Aucun enfant ajouté. Veuillez d'abord ajouter un enfant.",
-              style: TextStyle(color: Colors.grey, fontSize: 14),
-            );
-          }
+          // if (childrenCtrl.childrenNonInscrit.isEmpty) {
+          //   return const Text(
+          //     "Aucun enfant ajouté. Veuillez d'abord ajouter un enfant.",
+          //     style: TextStyle(color: Colors.grey, fontSize: 14),
+          //   );
+          // }
 
           return DropdownButtonFormField(
             initialValue: regCtrl.selectedChild.value,
