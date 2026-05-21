@@ -47,6 +47,8 @@ class FeesController extends GetxController {
         return selectedCantineOption;
       case ServiceType.transport:
         return selectedTransportOption;
+      case ServiceType.informatique:
+        return selectedInformatiqueOption;
       default:
         return Rxn<dynamic>();
     }

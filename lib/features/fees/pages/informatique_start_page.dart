@@ -153,11 +153,8 @@ class InformatiqueStartPage extends StatelessWidget {
                         );
                       }
 
-                      // API-first, mock en fallback
-                      final options =
-                          feesCtrl.fraisInformatique.isNotEmpty
-                              ? feesCtrl.fraisInformatique
-                              : mockInformatiqueOptions;
+                      // API-first
+                      final options = feesCtrl.fraisInformatique;
 
                       if (options.isEmpty) {
                         return Container(
