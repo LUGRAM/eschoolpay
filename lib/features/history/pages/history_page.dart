@@ -59,6 +59,7 @@ class _HistoryPageState extends State<HistoryPage> {
       case PaymentServiceType.mensualite:   return "frais de scolarité";
       case PaymentServiceType.cantine:      return "cantine scolaire";
       case PaymentServiceType.transport:    return "transport scolaire";
+      case PaymentServiceType.informatique: return "informatique scolaire";
     }
   }
 

@@ -78,6 +78,7 @@ class ChildrenController extends GetxController {
       final photo = child.photoPath != null ? File(child.photoPath!) : null;
       await _service.createChild(fields: fields, photo: photo);
       await fetchChildren();
+      await fetchNonInscritChildren(); // Ajouté pour mettre à jour la liste d'inscription
       return true;
     } catch (e) {
       debugPrint("createChild error: $e");

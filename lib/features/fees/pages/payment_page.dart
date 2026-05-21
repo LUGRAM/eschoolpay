@@ -173,6 +173,11 @@ class _PaymentPageState extends State<PaymentPage> {
 
   // ─── Détection du contexte ───────────────────────────────────
   PaymentContext _detectContext() {
+    final args = Get.arguments;
+    if (args is Map && args['context'] == 'inscription') {
+      return PaymentContext.inscription;
+    }
+
     if (Get.isRegistered<RegistrationController>()) {
       final regCtrl = Get.find<RegistrationController>();
       if (regCtrl.selectedChild.value != null) {
@@ -293,40 +298,21 @@ class _PaymentPageState extends State<PaymentPage> {
     final AnneeScolaireController anneeCtrl = Get.find();
     final ChildrenController childrenCtrl = Get.find();
 
-    var isAlreadyRegistered = false.obs;
     final school = schoolsCtrl.selectedSchool.value!;
     final level = schoolsCtrl.selectedLevel.value!;
     final annee = anneeCtrl.selectedYear.value!;
 
-    // ── 1. Enregistrement de l'inscription ──────────────────────
-    try {
-      await regCtrl.confirmRegistration();
-    } catch (e) {
-      _stopLoading();
-      Get.snackbar("Erreur", "Impossible d'enregistrer l'inscription.");
-      return;
-    }
-
     // ── 2. Lancement du paiement mobile ─────────────────────────
     final InscriptionService service = InscriptionService();
-
-    // final response = await service.payerFrais(
-    //   eleveId: int.parse(child.id.toString()),
-    //   anneeId: anneeId,
-    //   fraisId: inscriptionFraisId,
-    //   montant: amount.toDouble(),
-    //   methode: method,
-    //   telephone: phoneCtrl.text,
-    // );
 
     final result = await service.createInscription(
       eleveId: int.parse(child.id!),
       levelId: int.parse(level.id.toString()),
       anneeId: anneeId,
       ecoleId: int.parse(schoolId.toString()),
-      telephone: phoneCtrl.text,
+      telephone: phoneCtrl.text.replaceAll(' ', ''),
       methode: method,
-      frais: isAlreadyRegistered.value
+      frais: regCtrl.isAlreadyRegistered.value
           ? 0
           : amount.toDouble(), // logique ajoutée
     );
@@ -343,7 +329,7 @@ class _PaymentPageState extends State<PaymentPage> {
       "school_name": (data['ecole']?['nom'] ?? schoolName).toString(),
       "grade": (data['niveau']?['nom'] ?? level.name).toString(),
       "niveau_id": (data['niveau']?['id'] ?? level.id).toString(),
-      "academic_year": anneeId.toString() ?? "",
+      "academic_year": annee.annee_scolaire ?? "",
     };
 
     childrenCtrl.updateChildExtras(child.id!, updatedExtras);
@@ -368,7 +354,7 @@ class _PaymentPageState extends State<PaymentPage> {
       attempts++;
 
       final result = await servicePay.check(reference);
-      final String? status = result['status']?.toString();
+      final String? status = result['statut']?.toString();
 
       debugPrint("Check inscription [$attempts/$_maxAttempts]: $status");
 
@@ -419,17 +405,20 @@ class _PaymentPageState extends State<PaymentPage> {
     final service = PaymentService();
 
     final child = feesCtrl.selectedChild.value!;
-    final frais = feesCtrl.selectedFraisScolaire.value
-        ?? feesCtrl.selectedCantineOption.value
-        ?? feesCtrl.selectedTransportOption.value
-        ?? feesCtrl.selectedInformatiqueOption.value;
+    final dynamic frais = feesCtrl.selected.value;
+
+    if (frais == null) {
+      _stopLoading();
+      Get.snackbar("Erreur", "Aucun frais sélectionné.");
+      return;
+    }
 
     //setState(() => _loadingLabel = "Envoi de la demande de paiement...");
 
     print("=========== Affichage =================");
     print(child.id.toString());
     print(feesCtrl.selectedSchoolYearId.value.toString());
-    print(frais!.id.toString());
+    print(frais.id.toString());
     print(feesCtrl.totalAmount.toDouble());
     final response = await service.payerFrais(
       eleveId: int.parse(child.id.toString()),
@@ -437,7 +426,7 @@ class _PaymentPageState extends State<PaymentPage> {
       fraisId: int.parse(frais.id.toString()),
       montant: feesCtrl.totalAmount.toDouble(),
       methode: method,
-      telephone: phoneCtrl.text,
+      telephone: phoneCtrl.text.replaceAll(' ', ''),
     );
 
     debugPrint("Réponse initiale paiement: $response");
@@ -463,18 +452,27 @@ class _PaymentPageState extends State<PaymentPage> {
           attempts++;
 
           final result = await service.check(reference);
-          final String? status = result['status']?.toString();
+          final String? status = result['statut']?.toString();
 
           debugPrint("Check paiement [$attempts/$_maxAttempts]: $status");
 
           if (status == 'PAYED') {
             timer.cancel();
 
+            // Mapping ServiceType -> PaymentServiceType
+            PaymentServiceType histService;
+            switch(feesCtrl.currentService.value) {
+              case ServiceType.cantine: histService = PaymentServiceType.cantine; break;
+              case ServiceType.transport: histService = PaymentServiceType.transport; break;
+              case ServiceType.informatique: histService = PaymentServiceType.informatique; break;
+              default: histService = PaymentServiceType.mensualite;
+            }
+
             _addToHistory(PaymentHistory(
               id: DateTime.now().millisecondsSinceEpoch.toString(),
               childId: child.id ?? '',
               childName: child.fullName,
-              service: PaymentServiceType.mensualite,
+              service: histService,
               amount: feesCtrl.totalAmount,
               date: DateTime.now(),
               method: method,

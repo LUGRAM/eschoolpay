@@ -113,6 +113,7 @@ class PaymentHistoryController extends GetxController {
       case PaymentServiceType.mensualite:   return "Frais de scolarité";
       case PaymentServiceType.cantine:      return "Cantine scolaire";
       case PaymentServiceType.transport:    return "Transport scolaire";
+      case PaymentServiceType.informatique: return "Informatique";
     }
   }
 
@@ -122,6 +123,7 @@ class PaymentHistoryController extends GetxController {
       case PaymentServiceType.mensualite:   return Icons.receipt_long_rounded;
       case PaymentServiceType.cantine:      return Icons.restaurant_rounded;
       case PaymentServiceType.transport:    return Icons.directions_bus_rounded;
+      case PaymentServiceType.informatique: return Icons.computer_rounded;
     }
   }
 

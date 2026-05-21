@@ -1,6 +1,6 @@
 // features/history/models/payment_history_model.dart
 
-enum PaymentServiceType { inscription, mensualite, cantine, transport }
+enum PaymentServiceType { inscription, mensualite, cantine, transport, informatique }
 
 enum PaymentStatus { success, pending, failed }
 
