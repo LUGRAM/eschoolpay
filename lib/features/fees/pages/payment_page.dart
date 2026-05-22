@@ -452,7 +452,7 @@ class _PaymentPageState extends State<PaymentPage> {
           attempts++;
 
           final result = await service.check(reference);
-          final String? status = result['statut']?.toString();
+          final String? status = result['status']?.toString();
 
           debugPrint("Check paiement [$attempts/$_maxAttempts]: $status");
 
