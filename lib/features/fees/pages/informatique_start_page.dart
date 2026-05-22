@@ -19,12 +19,6 @@ class InformatiqueStartPage extends StatelessWidget {
     final childrenCtrl = Get.find<ChildrenController>();
     final anneeCtrl = Get.find<AnneeScolaireController>();
 
-    final selected = anneeCtrl.selectedYear.value;
-    final normalizedSelected = selected == null
-        ? null
-        : anneeCtrl.schoolYears
-            .firstWhereOrNull((e) => e.id == selected.id);
-
     return Scaffold(
       appBar: AppBar(title: const Text("Cours d'Informatique")),
       body: SafeArea(
@@ -33,236 +27,221 @@ class InformatiqueStartPage extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1️⃣ ENFANT
-                    const Text(
-                      "Enfant",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
+                child: Obx(() {
+                  final selectedYear = anneeCtrl.selectedYear.value;
 
-                    Obx(() {
-                      final eligibleChildren = childrenCtrl.children
-                          .where((c) => c.schoolId != null)
-                          .toList();
+                  if (selectedYear == null) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-                      if (eligibleChildren.isEmpty) {
-                        return Container(
+                  final eligibleChildren = childrenCtrl.children
+                      .where((c) => c.schoolId != null)
+                      .toList();
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1️⃣ ENFANT
+                      const Text(
+                        "Enfant",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+
+                      if (eligibleChildren.isEmpty)
+                        Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Colors.orange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color:
-                                  Colors.orange.withValues(alpha: 0.3),
+                              color: Colors.orange.withValues(alpha: 0.3),
                             ),
                           ),
                           child: const Row(
                             children: [
-                              Icon(Icons.info_outline,
-                                  color: Colors.orange),
+                              Icon(Icons.info_outline, color: Colors.orange),
                               SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   "Aucun enfant inscrit. Veuillez d'abord inscrire un enfant dans un établissement.",
-                                  style:
-                                      TextStyle(color: Colors.orange),
+                                  style: TextStyle(color: Colors.orange),
                                 ),
                               ),
                             ],
                           ),
-                        );
-                      }
-
-                      return DropdownButtonFormField<ChildModel>(
-                        initialValue: feesCtrl.selectedChild.value,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
+                        )
+                      else
+                        DropdownButtonFormField<ChildModel>(
+                          initialValue: feesCtrl.selectedChild.value,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                           ),
+                          hint: const Text("Sélectionnez un enfant"),
+                          items: eligibleChildren
+                              .map(
+                                (c) => DropdownMenuItem(
+                              value: c,
+                              child: Text(
+                                c.displaySchool.isNotEmpty && c.displaySchool != "Non renseignée"
+                                    ? "${c.fullName} (${c.displaySchool})"
+                                    : c.fullName,
+                              ),
+                            ),
+                          )
+                              .toList(),
+                          onChanged: (val) {
+                            if (val?.id != null) {
+                              feesCtrl.selectChild(
+                                val!,
+                                selectedYear.id.toString(),
+                                "INFORMATIQUE",
+                              );
+                            }
+                          },
                         ),
-                        hint: const Text("Sélectionnez un enfant"),
-                        items: eligibleChildren
-                            .map(
-                              (c) => DropdownMenuItem(
-                                value: c,
-                                child: Text(
-                                  c.displaySchool.isNotEmpty && c.displaySchool != "Non renseignée"
-                                      ? "${c.fullName} (${c.displaySchool})"
-                                      : c.fullName,
-                                ),
+
+                      const SizedBox(height: 24),
+
+                      // 2️⃣ FORMATIONS
+                      const Text(
+                        "Formation informatique",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 10),
+
+                      Builder(builder: (context) {
+                        if (feesCtrl.selectedChild.value == null) {
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.grey.withValues(alpha: 0.3),
                               ),
-                            )
-                            .toList(),
-                        onChanged: (val) {
-                          if (val?.id != null &&
-                              normalizedSelected != null) {
-                            feesCtrl.selectChild(
-                              val!,
-                              normalizedSelected.id.toString(),
-                              "INFORMATIQUE",
-                            );
-                          }
-                        },
-                      );
-                    }),
-
-                    const SizedBox(height: 24),
-
-                    // 2️⃣ FORMATIONS
-                    const Text(
-                      "Formation informatique",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 10),
-
-                    Obx(() {
-                      if (feesCtrl.selectedChild.value == null) {
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color:
-                                  Colors.grey.withValues(alpha: 0.3),
                             ),
-                          ),
-                          child: const Text(
-                            "Veuillez d'abord sélectionner un enfant",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
-                          ),
-                        );
-                      }
-
-                      if (feesCtrl.isLoadingFrais.value) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(32),
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      }
-
-                      // API-first
-                      final options = feesCtrl.fraisInformatique;
-
-                      if (options.isEmpty) {
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.red.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(Icons.computer_rounded,
-                                  color: Colors.red),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  "Aucune formation disponible pour cet établissement.",
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-
-                      return Column(
-                        children: options.map((opt) {
-                          final isSelected = feesCtrl
-                                  .selectedInformatiqueOption
-                                  .value
-                                  ?.id ==
-                              opt.id;
-
-                          return GestureDetector(
-                            onTap: () {
-                              feesCtrl.selectedInformatiqueOption
-                                  .value = opt;
-                            },
-                            child: Container(
-                              margin:
-                                  const EdgeInsets.only(bottom: 12),
-                              decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.circular(12),
-                                color: isSelected
-                                    ? AppColors.primarySoft
-                                        .withValues(alpha: 0.1)
-                                    : Colors.grey
-                                        .withValues(alpha: 0.05),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? AppColors.primarySoft
-                                      : Colors.grey
-                                          .withValues(alpha: 0.3),
-                                  width: 2,
-                                ),
-                              ),
-                              child: ListTile(
-                                contentPadding:
-                                    const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                leading: Radio(
-                                  value: opt,
-                                  groupValue: feesCtrl
-                                      .selectedInformatiqueOption
-                                      .value,
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      feesCtrl
-                                          .selectedInformatiqueOption
-                                          .value = value;
-                                    }
-                                  },
-                                  activeColor: AppColors.primarySoft,
-                                ),
-                                title: Text(
-                                  opt.libelle,
-                                  style: TextStyle(
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.w600,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                trailing: Text(
-                                  "${opt.montant.toInt()} FCFA",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: isSelected
-                                        ? AppColors.primarySoft
-                                        : Colors.black87,
-                                  ),
-                                ),
+                            child: const Text(
+                              "Veuillez d'abord sélectionner un enfant",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
                               ),
                             ),
                           );
-                        }).toList(),
-                      );
-                    }),
-                  ],
-                ),
+                        }
+
+                        if (feesCtrl.isLoadingFrais.value) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+
+                        // API-first
+                        final options = feesCtrl.fraisInformatique;
+
+                        if (options.isEmpty) {
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.red.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.computer_rounded, color: Colors.red),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    "Aucune formation disponible pour cet établissement.",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          children: options.map((opt) {
+                            final isSelected =
+                                feesCtrl.selectedInformatiqueOption.value?.id == opt.id;
+
+                            return GestureDetector(
+                              onTap: () {
+                                feesCtrl.selectedInformatiqueOption.value = opt;
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: isSelected
+                                      ? AppColors.primarySoft.withValues(alpha: 0.1)
+                                      : Colors.grey.withValues(alpha: 0.05),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppColors.primarySoft
+                                        : Colors.grey.withValues(alpha: 0.3),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  leading: Radio(
+                                    value: opt,
+                                    groupValue: feesCtrl.selectedInformatiqueOption.value,
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        feesCtrl.selectedInformatiqueOption.value = value;
+                                      }
+                                    },
+                                    activeColor: AppColors.primarySoft,
+                                  ),
+                                  title: Text(
+                                    opt.libelle,
+                                    style: TextStyle(
+                                      fontWeight:
+                                          isSelected ? FontWeight.bold : FontWeight.w600,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  trailing: Text(
+                                    "${opt.montant.toInt()} FCFA",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: isSelected
+                                          ? AppColors.primarySoft
+                                          : Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      }),
+                    ],
+                  );
+                }),
               ),
             ),
+
 
             // FOOTER FIXE
             Padding(

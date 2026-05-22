@@ -19,26 +19,24 @@ class MonthlyFeesStartPage extends StatelessWidget {
     final childrenCtrl = Get.find<ChildrenController>();
     final controller = Get.find<AnneeScolaireController>();
 
-    final selected = controller.selectedYear.value;
-    final normalizedSelected = selected == null
-        ? null
-        : controller.schoolYears.firstWhereOrNull((e) => e.id == selected.id);
-
-    print("Affichage de l'annee scolaire: ${normalizedSelected?.id}");
-
     return Scaffold(
       appBar: AppBar(title: const Text("Frais de scolarité")),
       body: SafeArea(
         child: Column(
           children: [
-
             /// CONTENU
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Obx(() {
-
                   final children = childrenCtrl.children;
+                  final selectedYear = controller.selectedYear.value;
+
+                  if (selectedYear == null) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
                   if (children.isEmpty) {
                     return const Center(
@@ -50,21 +48,18 @@ class MonthlyFeesStartPage extends StatelessWidget {
                   }
 
                   final eligibleChildren = children
-                      .where((c) =>
-                  c.schoolId != null && c.grade != null)
+                      .where((c) => c.schoolId != null && c.grade != null)
                       .toList();
 
                   return SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
                         /// ENFANT
                         const Text(
                           "Enfant",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-
                         const SizedBox(height: 8),
 
                         DropdownButtonFormField<ChildModel>(
@@ -82,13 +77,13 @@ class MonthlyFeesStartPage extends StatelessWidget {
                             ),
                           ))
                               .toList(),
-                          onChanged: (child) async {
-                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                          onChanged: (child) {
                             if (child?.id != null) {
-                              print(child?.id);
-                              print(child?.matricule);
-                              print(normalizedSelected?.id);
-                              feesCtrl.selectChild(child!, normalizedSelected!.id.toString(), "MENSUEL");
+                              feesCtrl.selectChild(
+                                child!,
+                                selectedYear.id.toString(),
+                                "MENSUEL",
+                              );
                             }
                           },
                         ),

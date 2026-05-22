@@ -21,46 +21,45 @@ class CantineStartPage extends StatelessWidget {
     final childrenCtrl = Get.find<ChildrenController>();
     final controller = Get.find<AnneeScolaireController>();
 
-    final selected = controller.selectedYear.value;
-    final normalizedSelected = selected == null
-        ? null
-        : controller.schoolYears.firstWhereOrNull((e) => e.id == selected.id);
-
     return Scaffold(
       appBar: AppBar(title: const Text("Cantine scolaire")),
       body: SafeArea(
         child: Column(
           children: [
-            // ─────────────────────────────────────────────
-            // CONTENU SCROLLABLE
-            // ─────────────────────────────────────────────
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                child: Obx(() {
+                  final selectedYear = controller.selectedYear.value;
+
+                  if (selectedYear == null) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  final eligibleChildren = childrenCtrl.children
+                      .where((c) => c.schoolId != null)
+                      .toList();
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       // 1️⃣ ENFANT
-                    const Text(
-                      "Enfant",
-                      style:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
+                      const Text(
+                        "Enfant",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
 
-                    Obx(() {
-                      final eligibleChildren = childrenCtrl.children
-                          .where((c) => c.schoolId != null)
-                          .toList();
-
-                      if (eligibleChildren.isEmpty) {
-                        return Container(
+                      if (eligibleChildren.isEmpty)
+                        Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withValues(alpha:0.1),
+                            color: Colors.orange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.orange.withValues(alpha:0.3),
+                              color: Colors.orange.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Row(
@@ -75,193 +74,167 @@ class CantineStartPage extends StatelessWidget {
                               ),
                             ],
                           ),
-                        );
-                      }
-
-                      return DropdownButtonFormField<ChildModel>(
-                        isExpanded: true,
-                        initialValue: feesCtrl.selectedChild.value,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                        hint: const Text("Sélectionnez un enfant"),
-                        items: eligibleChildren
-                            .map(
-                              (c) => DropdownMenuItem<ChildModel>(
-                            value: c,
-                            child: Text(
-                              c.fullName,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
                         )
-                            .toList(),
-                        onChanged: (val) async {
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-
-                          if (val?.id != null) {
-                            print(val?.id);
-                            print(val?.matricule);
-                            print(normalizedSelected?.id);
-
-                            final yearId = prefs.getInt('selected_year_id') ?? 0;
-
-                            feesCtrl.selectChild(
-                              val!,
-                              normalizedSelected!.id.toString(),
-                              "CANTINE",
-                            );
-                          }
-                        },
-                      );
-                    }),
-
-                    const SizedBox(height: 24),
-
-                    // 2️⃣ FORFAITS CANTINE
-                    const Text(
-                      "Forfait cantine",
-                      style:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 10),
-
-                    Obx(() {
-                      final options = feesCtrl.fraisCantines;
-
-                      if (feesCtrl.selectedChild.value == null) {
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withValues(alpha:0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.grey.withValues(alpha:0.3),
+                      else
+                        DropdownButtonFormField<ChildModel>(
+                          isExpanded: true,
+                          initialValue: feesCtrl.selectedChild.value,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
                           ),
-                          child: const Text(
-                            "Veuillez d'abord sélectionner un enfant",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
-                          ),
-                        );
-                      }
-
-                      if (options.isEmpty) {
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha:0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.red.withValues(alpha:0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: const [
-                              Icon(Icons.restaurant, color: Colors.red),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  "Aucun forfait cantine disponible pour cet établissement.",
-                                  style: TextStyle(color: Colors.red),
-                                ),
+                          hint: const Text("Sélectionnez un enfant"),
+                          items: eligibleChildren
+                              .map(
+                                (c) => DropdownMenuItem<ChildModel>(
+                              value: c,
+                              child: Text(
+                                c.fullName,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
-                            ],
-                          ),
-                        );
-                      }
+                            ),
+                          )
+                              .toList(),
+                          onChanged: (val) {
+                            if (val?.id != null) {
+                              feesCtrl.selectChild(
+                                val!,
+                                selectedYear.id.toString(),
+                                "CANTINE",
+                              );
+                            }
+                          },
+                        ),
 
-                      return Column(
-                        children: options.map((opt) {
+                      const SizedBox(height: 24),
 
-                          final selected =
-                              feesCtrl.selectedFraisScolaire.value?.id == opt.id;
+                      // 2️⃣ FORFAITS CANTINE
+                      const Text(
+                        "Forfait cantine",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 10),
 
-                          return GestureDetector(
-                            onTap: () =>
-                            feesCtrl.selectedCantineOption.value = opt,
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: selected
-                                    ? AppColors.primarySoft.withValues(alpha:0.1)
-                                    : Colors.grey.withValues(alpha:0.05),
-                                border: Border.all(
-                                  color: selected
-                                      ? AppColors.primarySoft
-                                      : Colors.grey.withValues(alpha:0.3),
-                                  width: 2,
-                                ),
+                      Builder(builder: (context) {
+                        final options = feesCtrl.fraisCantines;
+
+                        if (feesCtrl.selectedChild.value == null) {
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.grey.withValues(alpha: 0.3),
                               ),
-                              child: ListTile(
-                                contentPadding:
-                                const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                leading: Radio(
-                                  value: opt,
-                                  groupValue:
-                                  feesCtrl.selectedCantineOption.value,
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      feesCtrl.selectedCantineOption.value =
-                                          value;
-                                    }
-                                  },
-                                  activeColor: AppColors.primarySoft,
-                                ),
-                                title: Text(
-                                  opt.libelle,
-                                  style: TextStyle(
-                                    fontWeight: selected
-                                        ? FontWeight.bold
-                                        : FontWeight.w600,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                subtitle: opt.libelle != null
-                                    ? Padding(
-                                  padding:
-                                  const EdgeInsets.only(top: 4),
-                                  child: Text(
-                                    opt.libelle!,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                )
-                                    : null,
-                                trailing: Text(
-                                  "${opt.montant} FCFA",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: selected
-                                        ? AppColors.primarySoft
-                                        : Colors.black87,
-                                  ),
-                                ),
+                            ),
+                            child: const Text(
+                              "Veuillez d'abord sélectionner un enfant",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
                               ),
                             ),
                           );
-                        }).toList(),
-                      );
-                    }),
-                  ],
-                ),
+                        }
+
+                        if (options.isEmpty) {
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.red.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: const [
+                                Icon(Icons.restaurant, color: Colors.red),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    "Aucun forfait cantine disponible pour cet établissement.",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          children: options.map((opt) {
+                            final selected =
+                                feesCtrl.selectedCantineOption.value?.id == opt.id;
+
+                            return GestureDetector(
+                              onTap: () =>
+                                  feesCtrl.selectedCantineOption.value = opt,
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: selected
+                                      ? AppColors.primarySoft.withValues(alpha: 0.1)
+                                      : Colors.grey.withValues(alpha: 0.05),
+                                  border: Border.all(
+                                    color: selected
+                                        ? AppColors.primarySoft
+                                        : Colors.grey.withValues(alpha: 0.3),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  leading: Radio(
+                                    value: opt,
+                                    groupValue: feesCtrl.selectedCantineOption.value,
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        feesCtrl.selectedCantineOption.value = value;
+                                      }
+                                    },
+                                    activeColor: AppColors.primarySoft,
+                                  ),
+                                  title: Text(
+                                    opt.libelle,
+                                    style: TextStyle(
+                                      fontWeight:
+                                          selected ? FontWeight.bold : FontWeight.w600,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  trailing: Text(
+                                    "${opt.montant} FCFA",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: selected
+                                          ? AppColors.primarySoft
+                                          : Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      }),
+                    ],
+                  );
+                }),
               ),
             ),
+            // ... (le reste du footer peut rester tel quel car il utilise déjà des Obx)
+
 
             // ─────────────────────────────────────────────
             // FOOTER FIXE
