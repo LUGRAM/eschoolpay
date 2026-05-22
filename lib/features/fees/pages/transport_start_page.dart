@@ -20,54 +20,50 @@ class TransportStartPage extends StatelessWidget {
     final childrenCtrl = Get.find<ChildrenController>();
     final controller = Get.find<AnneeScolaireController>();
 
-    final selected = controller.selectedYear.value;
-    final normalizedSelected = selected == null
-        ? null
-        : controller.schoolYears.firstWhereOrNull((e) => e.id == selected.id);
-
-    print("Affichage de l'annee scolaire: ${normalizedSelected?.id}");
-
     return Scaffold(
       appBar: AppBar(title: const Text("Transport scolaire")),
       body: SafeArea(
         child: Column(
           children: [
-            // ─────────────────────────────────────────────
-            // CONTENU SCROLLABLE
-            // ─────────────────────────────────────────────
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1️⃣ ENFANT
-                    const Text(
-                      "Enfant",
-                      style:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
+                child: Obx(() {
+                  final selectedYear = controller.selectedYear.value;
 
-                    Obx(() {
-                      final eligibleChildren = childrenCtrl.children
-                          .where((c) => c.schoolId != null)
-                          .toList();
+                  if (selectedYear == null) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-                      if (eligibleChildren.isEmpty) {
-                        return Container(
+                  final eligibleChildren = childrenCtrl.children
+                      .where((c) => c.schoolId != null)
+                      .toList();
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1️⃣ ENFANT
+                      const Text(
+                        "Enfant",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+
+                      if (eligibleChildren.isEmpty)
+                        Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withValues(alpha:0.1),
+                            color: Colors.orange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.orange.withValues(alpha:0.3),
+                              color: Colors.orange.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Row(
                             children: const [
-                              Icon(Icons.info_outline,
-                                  color: Colors.orange),
+                              Icon(Icons.info_outline, color: Colors.orange),
                               SizedBox(width: 12),
                               Expanded(
                                 child: Text(
@@ -77,195 +73,163 @@ class TransportStartPage extends StatelessWidget {
                               ),
                             ],
                           ),
-                        );
-                      }
-
-                      return DropdownButtonFormField<ChildModel>(
-                        initialValue: feesCtrl.selectedChild.value,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                        hint: const Text("Sélectionnez un enfant"),
-                        items: eligibleChildren
-                            .map(
-                              (c) => DropdownMenuItem(
-                            value: c,
-                            child: Text(
-                              "${c.fullName} (${c.displaySchool})",
-                            ),
-                          ),
                         )
-                            .toList(),
-                        /*onChanged: (val) async {
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          if (val?.id != null) {
-                            feesCtrl.selectChild(val!, prefs.getString('selected_year_id').toString(), "transport");
-                          }
-                        },*/
-                        onChanged: (val) async {
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          if (val?.id != null) {
-                            print(val?.id);
-                            print(val?.matricule);
-                            print(normalizedSelected?.id);
-
-                            // Récupère en tant qu'entier
-                            final yearId = prefs.getInt('selected_year_id') ?? 0;  // 0 = fallback safe
-
-                            feesCtrl.selectChild(
+                      else
+                        DropdownButtonFormField<ChildModel>(
+                          initialValue: feesCtrl.selectedChild.value,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                          hint: const Text("Sélectionnez un enfant"),
+                          items: eligibleChildren
+                              .map(
+                                (c) => DropdownMenuItem(
+                              value: c,
+                              child: Text(
+                                "${c.fullName} (${c.displaySchool})",
+                              ),
+                            ),
+                          )
+                              .toList(),
+                          onChanged: (val) {
+                            if (val?.id != null) {
+                              feesCtrl.selectChild(
                                 val!,
-                                normalizedSelected!.id.toString(),               // convertit en string seulement ici
-                                "TRANSPORT"
-                            );
-                          }
-                        },
-                      );
-                    }),
+                                selectedYear.id.toString(),
+                                "TRANSPORT",
+                              );
+                            }
+                          },
+                        ),
 
-                    const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                    // 2️⃣ FORFAITS TRANSPORT
-                    const Text(
-                      "Forfait transport",
-                      style:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 10),
+                      // 2️⃣ FORFAITS TRANSPORT
+                      const Text(
+                        "Forfait transport",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 10),
 
-                    Obx(() {
-                      final options = feesCtrl.fraisTransports;
+                      Builder(builder: (context) {
+                        final options = feesCtrl.fraisTransports;
 
-                      if (feesCtrl.selectedChild.value == null) {
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withValues(alpha:0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.grey.withValues(alpha:0.3),
-                            ),
-                          ),
-                          child: const Text(
-                            "Veuillez d'abord sélectionner un enfant",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
-                          ),
-                        );
-                      }
-
-                      if (options.isEmpty) {
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha:0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.red.withValues(alpha:0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: const [
-                              Icon(Icons.directions_bus, color: Colors.red),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  "Aucun forfait transport disponible pour cet établissement.",
-                                  style: TextStyle(color: Colors.red),
-                                ),
+                        if (feesCtrl.selectedChild.value == null) {
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.grey.withValues(alpha: 0.3),
                               ),
-                            ],
-                          ),
-                        );
-                      }
-
-                      return Column(
-                        children: options.map((opt) {
-                          final selected =
-                              feesCtrl.selectedTransportOption.value?.id == opt.id;
-
-                          return GestureDetector(
-                            onTap: () => feesCtrl
-                                .selectedTransportOption.value = opt,
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: selected
-                                    ? AppColors.primarySoft.withValues(alpha:0.1)
-                                    : Colors.grey.withValues(alpha:0.05),
-                                border: Border.all(
-                                  color: selected
-                                      ? AppColors.primarySoft
-                                      : Colors.grey.withValues(alpha:0.3),
-                                  width: 2,
-                                ),
-                              ),
-                              child: ListTile(
-                                contentPadding:
-                                const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                leading: Radio(
-                                  value: opt,
-                                  groupValue: feesCtrl
-                                      .selectedTransportOption.value,
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      feesCtrl.selectedTransportOption.value =
-                                          value;
-                                    }
-                                  },
-                                  activeColor: AppColors.primarySoft,
-                                ),
-                                title: Text(
-                                  opt.libelle,
-                                  style: TextStyle(
-                                    fontWeight: selected
-                                        ? FontWeight.bold
-                                        : FontWeight.w600,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                subtitle: opt.libelle != null
-                                    ? Padding(
-                                  padding:
-                                  const EdgeInsets.only(top: 4),
-                                  child: Text(
-                                    opt.libelle!,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                )
-                                    : null,
-                                trailing: Text(
-                                  "${opt.montant} FCFA",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: selected
-                                        ? AppColors.primarySoft
-                                        : Colors.black87,
-                                  ),
-                                ),
+                            ),
+                            child: const Text(
+                              "Veuillez d'abord sélectionner un enfant",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
                               ),
                             ),
                           );
-                        }).toList(),
-                      );
-                    }),
-                  ],
-                ),
+                        }
+
+                        if (options.isEmpty) {
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.red.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: const [
+                                Icon(Icons.directions_bus, color: Colors.red),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    "Aucun forfait transport disponible pour cet établissement.",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          children: options.map((opt) {
+                            final selected =
+                                feesCtrl.selectedTransportOption.value?.id == opt.id;
+
+                            return GestureDetector(
+                              onTap: () =>
+                                  feesCtrl.selectedTransportOption.value = opt,
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: selected
+                                      ? AppColors.primarySoft.withValues(alpha: 0.1)
+                                      : Colors.grey.withValues(alpha: 0.05),
+                                  border: Border.all(
+                                    color: selected
+                                        ? AppColors.primarySoft
+                                        : Colors.grey.withValues(alpha: 0.3),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  leading: Radio(
+                                    value: opt,
+                                    groupValue: feesCtrl.selectedTransportOption.value,
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        feesCtrl.selectedTransportOption.value = value;
+                                      }
+                                    },
+                                    activeColor: AppColors.primarySoft,
+                                  ),
+                                  title: Text(
+                                    opt.libelle,
+                                    style: TextStyle(
+                                      fontWeight:
+                                          selected ? FontWeight.bold : FontWeight.w600,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  trailing: Text(
+                                    "${opt.montant} FCFA",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: selected
+                                          ? AppColors.primarySoft
+                                          : Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      }),
+                    ],
+                  );
+                }),
               ),
             ),
+
 
             // ─────────────────────────────────────────────
             // FOOTER FIXE
