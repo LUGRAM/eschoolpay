@@ -11,8 +11,8 @@ import '../../profile/controllers/profile_controller.dart';
 import '../../profile/pages/edit_sheet_page.dart';
 
 import '../../history/pages/history_page.dart';
+import '../../support/pages/support_page.dart';
 import '../../timelinepay/pages/payment_timeline_page.dart';
-import '../../notifications/pages/notifications_page.dart';
 import '../../settings/pages/settings_page.dart';
 import '../widgets/home_content.dart';
 
@@ -52,7 +52,7 @@ class _ESchoolHomePageState extends State<ESchoolHomePage> {
       HomeContent(                                           // ← plus de const
         onViewAll: () => setState(() => _selectedIndex = 0), // ← même action que _buildNavItem index 0
       ),           // Index 2 (Home par défaut)
-      const NotificationsPage(),    // Index 3
+      const SupportPage(),    // Index 3
       const SettingsPage(),         // Index 4
     ];
   }
@@ -149,7 +149,7 @@ class _ESchoolHomePageState extends State<ESchoolHomePage> {
                 _buildNavItem(Icons.history_rounded, 0),
                 _buildNavItem(Icons.assignment_outlined, 1),
                 _buildNavItem(Icons.home_rounded, 2),
-                _buildNavItem(Icons.notifications_none_rounded, 3),
+                _buildNavItem(Icons.support_agent_rounded, 3),
                 _buildNavItem(Icons.settings_outlined, 4),
               ],
             ),

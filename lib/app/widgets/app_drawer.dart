@@ -19,10 +19,10 @@ class AppDrawer extends StatelessWidget {
         children: [
           _buildHeader(),
           _buildMenuItem(Icons.privacy_tip_outlined, "Politique de confidentialité", () {
-            Get.to(() => const PrivacyPolicyPage());
+            //Get.to(() => const PrivacyPolicyPage());
           }),
           _buildMenuItem(Icons.info_outline, "À propos de nous", () {
-            Get.to(() => const AboutFaqPage());
+            //Get.to(() => const AboutFaqPage());
           }),
           _buildMenuItem(Icons.share_outlined, "Partager l'application", () async {
             Get.back();
@@ -32,7 +32,7 @@ class AppDrawer extends StatelessWidget {
             );
           }),
           _buildMenuItem(Icons.quiz_outlined, "FAQ", () {
-            Get.to(() => const FAQPage()); // Si tu n'as pas encore défini de route nommée
+            //Get.to(() => const FAQPage()); // Si tu n'as pas encore défini de route nommée
           }),
 
           const Spacer(), // Pousse la déconnexion vers le bas

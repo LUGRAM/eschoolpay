@@ -1,10 +1,10 @@
 // features/history/pages/payment_detail_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../controllers/payment_history_controller.dart';
 import '../models/payment_history_model.dart';
-import 'dart:typed_data';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
@@ -254,93 +254,210 @@ class PaymentDetailPage extends StatelessWidget {
       PaymentHistory h,
       PaymentHistoryController ctrl,
       ) async {
-
     final pdf = pw.Document();
 
-    final reference =
-        "${h.reference}";
+    final fontRegular = await PdfGoogleFonts.poppinsRegular();
+    final fontBold    = await PdfGoogleFonts.poppinsBold();
 
+    // ✅ Chargement du logo depuis les assets Flutter
+    final logoBytes = await rootBundle.load('assets/logo.png');
+    final logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
 
+    final String refLabel =
+        h.reference ?? "REF-${h.id.split('-').last.toUpperCase()}";
     final qrData =
-        "https://eschool.itmaster-africa.com/api/receipt/$reference";
+        "https://eschool.itmaster-africa.com/api/receipt/$refLabel";
 
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a5,
+        margin: const pw.EdgeInsets.all(28),
+        theme: pw.ThemeData.withFont(base: fontRegular, bold: fontBold),
         build: (context) {
-          return pw.Container(
-            padding: const pw.EdgeInsets.all(24),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.center,
-              children: [
-
-                // Titre
-                pw.Text(
-                  "REÇU DE PAIEMENT",
-                  style: pw.TextStyle(
-                    fontSize: 22,
-                    fontWeight: pw.FontWeight.bold,
+          return pw.Stack(
+            children: [
+              // ─── 1. FILIGRANE (Placé en premier -> Arrière-plan) ───
+              pw.Positioned.fill(
+                child: pw.Center(
+                  child: pw.Transform.rotate(
+                    angle: -0.5,
+                    child: pw.Text(
+                      h.status == PaymentStatus.success ? "PAYÉ" : "EN ATTENTE",
+                      style: pw.TextStyle(
+                        font: fontBold,
+                        fontSize: h.status == PaymentStatus.success ? 75 : 48,
+                        // ✅ Opacité légèrement réduite (0.06) pour fondre le texte dans le décor
+                        color: const PdfColor(0.75, 0.75, 0.75, 0.06),
+                      ),
+                    ),
                   ),
                 ),
+              ),
 
-                pw.SizedBox(height: 20),
-
-                // Infos
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(16),
-                  decoration: pw.BoxDecoration(
-                    border: pw.Border.all(color: PdfColors.grey300),
-                    borderRadius: pw.BorderRadius.circular(10),
-                  ),
-                  child: pw.Column(
+              // ─── 2. CONTENU PRINCIPAL (Placé en second -> Premier plan) ───
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: [
+                  // ── Header : logo + badge statut ──
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
-
-                      _pdfRow("Enfant", h.childName),
-                      _pdfRow("École", h.schoolName),
-                      _pdfRow("Niveau", h.grade),
-                      _pdfRow("Service", ctrl.serviceLabel(h.service)),
-                      _pdfRow("Montant", _formatAmount(h.amount)),
-                      _pdfRow("Méthode", h.method),
-                      _pdfRow(
-                        "Référence",
-                        "REF-${h.id.toUpperCase().substring(0, h.id.length.clamp(0, 8))}",
-                      ),
-                      _pdfRow(
-                        "Date",
-                        "${_formatDate(h.date)} à ${_formatTime(h.date)}",
+                      pw.Row(
+                        children: [
+                          pw.Image(logoImage, width: 36, height: 36),
+                          pw.SizedBox(width: 8),
+                          pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                "Bantu",
+                                style: pw.TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: PdfColor.fromHex("#063D66"),
+                                ),
+                              ),
+                              pw.Text(
+                                "SchoolPay",
+                                style: pw.TextStyle(
+                                  fontSize: 9,
+                                  color: PdfColor.fromHex("#1976D2"),
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ),
 
-                pw.SizedBox(height: 30),
+                  pw.SizedBox(height: 18),
 
-                // QR CODE
-                pw.BarcodeWidget(
-                  barcode: pw.Barcode.qrCode(),
-                  data: qrData,
-                  width: 120,
-                  height: 120,
-                ),
-
-                pw.SizedBox(height: 12),
-
-                pw.Text(
-                  "Scannez pour vérifier le reçu",
-                  style: const pw.TextStyle(fontSize: 10),
-                ),
-
-                pw.Spacer(),
-
-                pw.Text(
-                  "Merci pour votre paiement",
-                  style: pw.TextStyle(
-                    fontSize: 12,
-                    fontWeight: pw.FontWeight.bold,
+                  // ── Montant ──
+                  pw.Text(
+                    "Reçu de Paiement",
+                    style: pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
                   ),
-                ),
-              ],
-            ),
+                  pw.SizedBox(height: 6),
+                  pw.Text(
+                    _formatAmount(h.amount),
+                    style: pw.TextStyle(
+                      fontSize: 30,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.black,
+                    ),
+                  ),
+                  pw.SizedBox(height: 4),
+                  pw.Container(
+                    width: 36, height: 3,
+                    decoration: pw.BoxDecoration(
+                      color: PdfColor.fromHex("#063D66"),
+                      borderRadius: pw.BorderRadius.circular(2),
+                    ),
+                  ),
+
+                  pw.SizedBox(height: 18),
+
+                  // ── Tableau des détails (Désormais 100% lisible au premier plan) ──
+                  pw.Container(
+                    width: double.infinity,
+                    padding: const pw.EdgeInsets.all(16),
+                    decoration: pw.BoxDecoration(
+                      borderRadius: pw.BorderRadius.circular(14),
+                      border: pw.Border.all(
+                        color: PdfColors.grey300,
+                        width: 1,
+                      ),
+                    ),
+                    child: pw.Column(
+                      children: [
+                        _pdfRow("Élève",           h.childName),
+                        _pdfDivider(),
+                        _pdfRow("Niveau / Classe", h.grade.isNotEmpty ? h.grade : "—"),
+                        _pdfDivider(),
+                        _pdfRow("Service",         ctrl.serviceLabel(h.service)),
+                        _pdfDivider(),
+                        _pdfRow("Montant",         _formatAmount(h.amount)),
+                        _pdfDivider(),
+                        _pdfRow("Méthode",         h.method),
+                        _pdfDivider(),
+                        _pdfRow("Référence",       refLabel),
+                        _pdfDivider(),
+                        _pdfRow("Date & Heure",    "${_formatDate(h.date)} à ${_formatTime(h.date)}"),
+                      ],
+                    ),
+                  ),
+
+                  pw.SizedBox(height: 16),
+
+                  // ── Ligne pointillée ──
+                  pw.Container(
+                    width: double.infinity, height: 1,
+                    child: pw.CustomPaint(
+                      painter: (canvas, size) {
+                        canvas.setStrokeColor(PdfColors.grey300);
+                        canvas.setLineWidth(0.8);
+                        canvas.setLineDashPattern([4, 4]);
+                        canvas.drawLine(0, 0, size.x, 0);
+                        canvas.strokePath();
+                      },
+                    ),
+                  ),
+
+                  pw.SizedBox(height: 14),
+
+                  // ── Footer : contact + QR ──
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            "Besoin d'aide ?",
+                            style: pw.TextStyle(
+                                fontSize: 9, fontWeight: pw.FontWeight.bold),
+                          ),
+                          pw.Text(
+                            "support@itmaster-africa.com",
+                            style: const pw.TextStyle(
+                                fontSize: 8, color: PdfColors.black),
+                          ),
+                          pw.SizedBox(height: 8),
+                          pw.Text(
+                            "Document généré par Bantu SchoolPay",
+                            style: pw.TextStyle(
+                              fontSize: 7,
+                              fontStyle: pw.FontStyle.italic,
+                              color: PdfColors.grey500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.Column(
+                        children: [
+                          pw.BarcodeWidget(
+                            barcode: pw.Barcode.qrCode(),
+                            data: qrData,
+                            width: 56, height: 56,
+                            color: PdfColors.black,
+                          ),
+                          pw.SizedBox(height: 4),
+                          pw.Text(
+                            "VÉRIFIER",
+                            style: pw.TextStyle(
+                                fontSize: 7, fontWeight: pw.FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           );
         },
       ),
@@ -351,6 +468,15 @@ class PaymentDetailPage extends StatelessWidget {
     );
   }
 
+
+// Séparateur léger entre les lignes du tableau PDF
+  static pw.Widget _pdfDivider() => pw.Container(
+    height: 0.5,
+    color: PdfColors.grey300,
+    margin: const pw.EdgeInsets.symmetric(vertical: 2),
+  );
+
+  // Row de données optimisée : étiquettes grisées, valeurs sombres et bien visibles
   static pw.Widget _pdfRow(String label, String value) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 6),
@@ -359,14 +485,18 @@ class PaymentDetailPage extends StatelessWidget {
         children: [
           pw.Text(
             label,
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
+            style: const pw.TextStyle(
+              color: PdfColors.grey600,
               fontSize: 11,
             ),
           ),
           pw.Text(
-            value.isEmpty ? "—" : value,
-            style: const pw.TextStyle(fontSize: 11),
+            value,
+            style: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: 11,
+              color: PdfColor.fromHex("#0b0b0b"),
+            ),
           ),
         ],
       ),

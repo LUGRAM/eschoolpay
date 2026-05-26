@@ -8,18 +8,22 @@ class AppColors {
   static const primarySoftPast = Color(0xFF3F7C97);
 
   // Dégradé bouton
-  static const gradientStart = Color(0xFF0D47A1);
-  static const gradientEnd = Color(0xFF1E88E5);
+  static const gradientStart  = Color(0xFF0D47A1);
+  static const gradientEnd    = Color(0xFF1E88E5);
 
   // Border + glow
-  static const border = Color(0xFFBFD7EA);
-  static const borderGlow = Color(0xFF90CAF9);
+  static const border         = Color(0xFFBFD7EA);
+  static const borderGlow     = Color(0xFF90CAF9);
 
   // Backgrounds
-  static const background = Color(0xFFF7F9FC);
-  static const card = Colors.white;
+  static const background     = Color(0xFFF7F9FC);
+  static const card           = Colors.white;
 
   // Text
-  static const textPrimary = Color(0xFF0F172A);
-  static const textMuted = Color(0xFF64748B);
+  static const textPrimary    = Color(0xFF0F172A);
+  static const textMuted      = Color(0xFF64748B);
+
+  //icons
+  static const whatsapp       = Color(0xFF25D366);
+  static const gmail          = Color(0xFFEA4335);
 }
