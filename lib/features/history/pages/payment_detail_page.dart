@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/payment_history_controller.dart';
 import '../models/payment_history_model.dart';
+import 'dart:typed_data';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 
 class PaymentDetailPage extends StatelessWidget {
   const PaymentDetailPage({super.key});
@@ -190,13 +194,33 @@ class PaymentDetailPage extends StatelessWidget {
                       _InfoRow(label: "Heure", value: _formatTime(h.date)),
                       _InfoRow(
                         label: "Référence",
-                        value: "REF-${h.id.toUpperCase().substring(0, h.id.length.clamp(0, 8))}",
+                        value: "${h.reference}",
                         isLast: true,
                       ),
                     ],
                   ),
 
                   const SizedBox(height: 28),
+
+                  // Bouton impression PDF
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _printReceipt(h, ctrl),
+                      icon: const Icon(Icons.picture_as_pdf_rounded),
+                      label: const Text("Imprimer le reçu PDF"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF063D66),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
 
                   // Bouton retour
                   SizedBox(
@@ -220,6 +244,129 @@ class PaymentDetailPage extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Future<void> _printReceipt(
+      PaymentHistory h,
+      PaymentHistoryController ctrl,
+      ) async {
+
+    final pdf = pw.Document();
+
+    final reference =
+        "${h.reference}";
+
+
+    final qrData =
+        "https://eschool.itmaster-africa.com/api/receipt/$reference";
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a5,
+        build: (context) {
+          return pw.Container(
+            padding: const pw.EdgeInsets.all(24),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+
+                // Titre
+                pw.Text(
+                  "REÇU DE PAIEMENT",
+                  style: pw.TextStyle(
+                    fontSize: 22,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+
+                pw.SizedBox(height: 20),
+
+                // Infos
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(16),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(color: PdfColors.grey300),
+                    borderRadius: pw.BorderRadius.circular(10),
+                  ),
+                  child: pw.Column(
+                    children: [
+
+                      _pdfRow("Enfant", h.childName),
+                      _pdfRow("École", h.schoolName),
+                      _pdfRow("Niveau", h.grade),
+                      _pdfRow("Service", ctrl.serviceLabel(h.service)),
+                      _pdfRow("Montant", _formatAmount(h.amount)),
+                      _pdfRow("Méthode", h.method),
+                      _pdfRow(
+                        "Référence",
+                        "REF-${h.id.toUpperCase().substring(0, h.id.length.clamp(0, 8))}",
+                      ),
+                      _pdfRow(
+                        "Date",
+                        "${_formatDate(h.date)} à ${_formatTime(h.date)}",
+                      ),
+                    ],
+                  ),
+                ),
+
+                pw.SizedBox(height: 30),
+
+                // QR CODE
+                pw.BarcodeWidget(
+                  barcode: pw.Barcode.qrCode(),
+                  data: qrData,
+                  width: 120,
+                  height: 120,
+                ),
+
+                pw.SizedBox(height: 12),
+
+                pw.Text(
+                  "Scannez pour vérifier le reçu",
+                  style: const pw.TextStyle(fontSize: 10),
+                ),
+
+                pw.Spacer(),
+
+                pw.Text(
+                  "Merci pour votre paiement",
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
+
+  static pw.Widget _pdfRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 6),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            label,
+            style: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: 11,
+            ),
+          ),
+          pw.Text(
+            value.isEmpty ? "—" : value,
+            style: const pw.TextStyle(fontSize: 11),
           ),
         ],
       ),

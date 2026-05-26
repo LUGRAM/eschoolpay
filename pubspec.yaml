@@ -47,6 +47,9 @@ dependencies:
   shimmer: ^3.0.0
   smooth_page_indicator: ^1.1.0
   flutter_svg: ^2.0.9
+  pdf: ^3.11.0
+  printing: ^5.13.4
+  qr_flutter: ^4.1.0
 
 
 dev_dependencies:
