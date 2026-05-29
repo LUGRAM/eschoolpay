@@ -4,8 +4,8 @@ import '../../../core/network/api_client.dart';
 import '../models/child_model.dart';
 
 class ChildrenService {
-  Future<List<ChildModel>> fetchChildren() async {
-    final response = await ApiClient.get("/eleves");
+  Future<List<ChildModel>> fetchChildren(String? api) async {
+    final response = await ApiClient.get(api ?? "/enfants");
 
     print("======= ENFANTS =======");
     print("STATUS CODE: ${response.statusCode}");
@@ -20,7 +20,7 @@ class ChildrenService {
     throw Exception("Erreur chargement enfants (${response.statusCode})");
   }
 
-  Future<List<ChildModel>> fetchNonPaidChildren() async {
+  /*Future<List<ChildModel>> fetchNonPaidChildren() async {
     final response = await ApiClient.get("/eleves-non-inscrit");
 
     print("======= ENFANTS =======");
@@ -34,7 +34,7 @@ class ChildrenService {
     }
 
     throw Exception("Erreur chargement enfants (${response.statusCode})");
-  }
+  }*/
 
   Future<Map<String, dynamic>> createChild({
     required Map<String, String> fields,

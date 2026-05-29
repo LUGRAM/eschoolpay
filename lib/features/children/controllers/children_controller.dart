@@ -14,6 +14,7 @@ import '../services/children_service.dart';
 class ChildrenController extends GetxController {
   final ChildrenService _service = ChildrenService();
   final children = <ChildModel>[].obs;
+  final childrenInscrit = <ChildModel>[].obs;
   final childrenNonInscrit = <ChildModel>[].obs;
   final isLoading = false.obs;
   final isUploadingPhoto = false.obs;
@@ -30,6 +31,7 @@ class ChildrenController extends GetxController {
     debugPrint('ChildrenController isLoggedIn: $isLoggedIn');
     if (isLoggedIn) fetchChildren();
     if (isLoggedIn) fetchNonInscritChildren();
+    if (isLoggedIn) fetchInscritChildren();
   }
 
   // ─── FETCH ───────────────────────────────────────────────────
@@ -37,8 +39,28 @@ class ChildrenController extends GetxController {
     if (!isLoggedIn) return;
     try {
       isLoading.value = true;
-      final result = await _service.fetchChildren();
+      final result = await _service.fetchChildren(null);
       children.assignAll(result);
+    } catch (e) {
+      if (e.toString().contains("401")) {
+        Get.snackbar("Session expirée", "Veuillez vous reconnecter");
+      } else {
+        Get.snackbar("Erreur", "Impossible de charger les enfants");
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ─── FETCH ───────────────────────────────────────────────────
+  Future<void> fetchInscritChildren() async {
+    if (!isLoggedIn) return;
+    try {
+      isLoading.value = true;
+      final result = await _service.fetchChildren('/eleves');
+      print("===============Liste des eleves inscrits=====================");
+      print(result);
+      childrenInscrit.assignAll(result);
     } catch (e) {
       if (e.toString().contains("401")) {
         Get.snackbar("Session expirée", "Veuillez vous reconnecter");
@@ -55,7 +77,7 @@ class ChildrenController extends GetxController {
     if (!isLoggedIn) return;
     try {
       isLoading.value = true;
-      final result = await _service.fetchNonPaidChildren();
+      final result = await _service.fetchChildren('/eleves-non-inscrit');
 
       print("Liste des eleves => $result");
       childrenNonInscrit.assignAll(result);

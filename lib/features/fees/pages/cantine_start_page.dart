@@ -30,6 +30,7 @@ class CantineStartPage extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Obx(() {
+                  final children = childrenCtrl.childrenInscrit;
                   final selectedYear = controller.selectedYear.value;
 
                   if (selectedYear == null) {
@@ -38,7 +39,7 @@ class CantineStartPage extends StatelessWidget {
                     );
                   }
 
-                  final eligibleChildren = childrenCtrl.children
+                  final eligibleChildren = children
                       .where((c) => c.schoolId != null)
                       .toList();
 

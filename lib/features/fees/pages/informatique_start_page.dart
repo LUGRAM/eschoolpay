@@ -28,6 +28,7 @@ class InformatiqueStartPage extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Obx(() {
+                  final children = childrenCtrl.childrenInscrit;
                   final selectedYear = anneeCtrl.selectedYear.value;
 
                   if (selectedYear == null) {
@@ -36,7 +37,7 @@ class InformatiqueStartPage extends StatelessWidget {
                     );
                   }
 
-                  final eligibleChildren = childrenCtrl.children
+                  final eligibleChildren = children
                       .where((c) => c.schoolId != null)
                       .toList();
 

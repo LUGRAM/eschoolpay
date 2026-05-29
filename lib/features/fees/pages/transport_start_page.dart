@@ -30,6 +30,7 @@ class TransportStartPage extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Obx(() {
                   final selectedYear = controller.selectedYear.value;
+                  final children = childrenCtrl.childrenInscrit;
 
                   if (selectedYear == null) {
                     return const Center(
@@ -37,7 +38,7 @@ class TransportStartPage extends StatelessWidget {
                     );
                   }
 
-                  final eligibleChildren = childrenCtrl.children
+                  final eligibleChildren = children
                       .where((c) => c.schoolId != null)
                       .toList();
 

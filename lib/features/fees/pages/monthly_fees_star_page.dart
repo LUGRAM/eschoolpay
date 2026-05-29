@@ -29,7 +29,7 @@ class MonthlyFeesStartPage extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Obx(() {
-                  final children = childrenCtrl.children;
+                  final children = childrenCtrl.childrenInscrit;
                   final selectedYear = controller.selectedYear.value;
 
                   if (selectedYear == null) {
