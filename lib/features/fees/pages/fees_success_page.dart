@@ -92,56 +92,73 @@ class FeesSuccessPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Colors.grey.shade200),
             ),
-            child: Column(
+            child: Stack(
               children: [
-                _buildRow("Élève", childName),
-                _buildRow("Type", feeLabel),
-                _buildRow("Montant", "$amount FCFA",
-                    bold: true, color: primaryColor),
-                _buildRow("Mode", method),
-                _buildRow(
-                  "Date",
-                  DateFormat('dd/MM/yyyy à HH:mm').format(date),
+                if (isSuccess || isPending)
+                  Positioned.fill(
+                    child: Center(
+                      child: Transform.rotate(
+                        angle: -0.5,
+                        child: Text(
+                          "Bantu SchoolPay",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.grey.withValues(alpha: 0.1),
+                            fontSize: 40,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                Column(
+                  children: [
+                    _buildRow("Élève", childName),
+                    _buildRow("Type", feeLabel),
+                    _buildRow("Montant", "$amount FCFA",
+                        bold: true, color: primaryColor),
+                    _buildRow("Mode", method),
+                    _buildRow(
+                      "Date",
+                      DateFormat('dd/MM/yyyy à HH:mm').format(date),
+                    ),
+                    if (isPending) ...[
+                      const Divider(height: 30),
+                      const Text(
+                        "Note : Votre inscription sera activée dès réception des fonds par l'administration.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ],
+                    if (isError) ...[
+                      const Divider(height: 30),
+                      Text(
+                        errorMessage,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        "Vérifiez votre connexion ou votre solde Mobile Money puis réessayez.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-
-                if (isPending) ...[
-                  const Divider(height: 30),
-                  const Text(
-                    "Note : Votre inscription sera activée dès réception des fonds par l'administration.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.orange,
-                    ),
-                  ),
-                ],
-
-                if (isError) ...[
-                  const Divider(height: 30),
-
-                  Text(
-                    errorMessage,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  const Text(
-                    "Vérifiez votre connexion ou votre solde Mobile Money puis réessayez.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
@@ -159,9 +176,15 @@ class FeesSuccessPage extends StatelessWidget {
                       Get.back();
                     },
                   ),
-
                 if (isError) const SizedBox(height: 12),
-
+                if (isSuccess || isPending)
+                  GradientButton(
+                    label: "Imprimer le reçu",
+                    onTap: () {
+                      Get.snackbar("Impression", "Préparation du document...");
+                    },
+                  ),
+                if (isSuccess || isPending) const SizedBox(height: 12),
                 GradientButton(
                   label: "Retour à l'accueil",
                   onTap: () => Get.offAllNamed(Routes.home),

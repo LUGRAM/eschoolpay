@@ -134,6 +134,7 @@ class FeesController extends GetxController {
 
     selectedChild.value = child;
     selectedSchoolYearId.value = schoolYearId.toString();
+    this.type.value = type;
 
     if (type == "MENSUEL") {
       await loadFraisScolaire(child.id!, schoolYearId.toString());
@@ -280,7 +281,11 @@ class FeesController extends GetxController {
     selectedCantineOption.value = null;
     selectedTransportOption.value = null;
     selectedInformatiqueOption.value = null;
+    fraisScolaires.clear();
+    fraisCantines.clear();
+    fraisTransports.clear();
     fraisInformatique.clear();
+    type.value = "";
     currentService.value = ServiceType.inscription;
     paymentMethod.value = 'Mobile Money';
   }

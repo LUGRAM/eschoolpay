@@ -333,6 +333,8 @@ class _PaymentPageState extends State<PaymentPage> {
     };
 
     childrenCtrl.updateChildExtras(child.id!, updatedExtras);
+    childrenCtrl.fetchInscritChildren();
+    childrenCtrl.fetchNonInscritChildren();
 
     debugPrint("Réponse initiale inscription: $result");
 
@@ -480,6 +482,13 @@ class _PaymentPageState extends State<PaymentPage> {
               schoolName: child.extras['school_name'] ?? '',
               grade: child.extras['grade'] ?? '',
             ));
+
+            // Refresh fees data
+            feesCtrl.selectChild(
+              child,
+              feesCtrl.selectedSchoolYearId.value!,
+              feesCtrl.type.value,
+            );
 
             _stopLoading();
             _navigateToResult(

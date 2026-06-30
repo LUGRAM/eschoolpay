@@ -62,6 +62,8 @@ class RegistrationController extends GetxController {
       };
 
       childrenCtrl.updateChildExtras(child.id!, updatedExtras);
+      childrenCtrl.fetchInscritChildren();
+      childrenCtrl.fetchNonInscritChildren();
 
       Get.snackbar(
         "Succès",
